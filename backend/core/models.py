@@ -19,7 +19,7 @@ def time_validator(value):
 
 
 def utc_offset_validator(value):
-    regex = '^[+-]\d{1,2}:?\d{0,2}$'  # +/-hh:mm
+    regex = '^[+-]\d{1,2}:?\d{0,2}$'  # +/-h(:mm)
     if not re.fullmatch(regex, value):
         raise serializers.ValidationError('Invalid time format. Valid examples: +1, -2:30')
 
@@ -42,7 +42,7 @@ class Event(models.Model):
     title = models.CharField(max_length=255)
     date = models.CharField(max_length=255, validators=[date_validator])
     time = models.CharField(max_length=255, default=DEFAULT_TIME, validators=[time_validator])
-    utc_offset = models.CharField(max_length=255, default=get_local_utc_offset())
+    utc_offset = models.CharField(max_length=255, default=get_local_utc_offset(), validators=[utc_offset_validator])
     interval = models.CharField(max_length=255, default='once')
     info = models.TextField(max_length=3000, null=True, blank=True)
 

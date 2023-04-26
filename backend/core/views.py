@@ -64,9 +64,9 @@ class EventsAPIView(views.APIView):
 
     @staticmethod
     def query_regex_check(query):
-        pattern = '[a-zA-Z]+\(.+\)'
-        if not re.search(pattern, query):
-            raise ValueError(f'Invalid query. Accepted regular expression: {pattern}')
+        regex = '^[a-zA-Z_]+\(.+\)$'
+        if not re.fullmatch(regex, query):
+            raise ValueError(f'Invalid query. Accepted regular expression: {regex}')
 
     @staticmethod
     def parse_query_operator(query_split):
@@ -78,7 +78,7 @@ class EventsAPIView(views.APIView):
 
     @staticmethod
     def parse_query_arguments(query_split):
-        args = query_split[1][:-1].replace('"', '')
+        args = query_split[1][:-1]
         if args.count('(') > 0:
             # For nested queries
             args = args.split('),')
@@ -88,6 +88,7 @@ class EventsAPIView(views.APIView):
             args = args.split(',')
         if not args:
             raise ValueError('No arguments provided')
+        args = [arg.strip('"') for arg in args]
         return tuple(args)
 
     def parse_query(self, query):

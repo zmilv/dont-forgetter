@@ -50,7 +50,7 @@ class ViewTestSuite(TestCase):
 
     def test_parse_query_using_and_operator_with_equal_less_than(self):
         result = View.parse_query(self.view_class, 'AND(EQUAL(title,"Title-1"),LESS_THAN(date,"2024-01-01"))')
-        expected_result = 'and', ('EQUAL(title,Title-1)', 'LESS_THAN(date,2024-01-01)')
+        expected_result = 'and', ('EQUAL(title,"Title-1")', 'LESS_THAN(date,"2024-01-01")')
         self.assertEqual(result, expected_result)
 
     def test_get_filter_kwargs_using_equal_operator(self):

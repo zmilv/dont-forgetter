@@ -18,8 +18,23 @@ def time_validator(value):
         raise serializers.ValidationError('Invalid time format. Valid format: hh:mm')
 
 
-def get_local_timezone():
-    return time.tzname[time.daylight]
+def utc_offset_validator(value):
+    regex = '^[+-]\d{1,2}:?\d{0,2}$'  # +/-hh:mm
+    if not re.fullmatch(regex, value):
+        raise serializers.ValidationError('Invalid time format. Valid examples: +1, -2:30')
+
+
+def get_local_utc_offset():
+    offset = -time.timezone/60/60
+    hours = int(offset)
+    mins = int(offset % 1 * 60)
+    if mins:
+        result = f'{hours}:{mins}'
+    else:
+        result = f'{hours}'
+    if result[0] != '-':
+        result = f'+{result}'
+    return result
 
 
 class Event(models.Model):
@@ -27,7 +42,7 @@ class Event(models.Model):
     title = models.CharField(max_length=255)
     date = models.CharField(max_length=255, validators=[date_validator])
     time = models.CharField(max_length=255, default=DEFAULT_TIME, validators=[time_validator])
-    timezone = models.CharField(max_length=255, default=get_local_timezone())
+    utc_offset = models.CharField(max_length=255, default=get_local_utc_offset())
     interval = models.CharField(max_length=255, default='once')
     info = models.TextField(max_length=3000, null=True, blank=True)
 

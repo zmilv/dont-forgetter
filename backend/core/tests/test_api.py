@@ -1,8 +1,7 @@
-from ..models import Event, DEFAULT_TIME, get_local_timezone
+from ..models import Event, DEFAULT_TIME, get_local_utc_offset
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 from rest_framework import status
-from datetime import datetime, timedelta
 
 
 class POSTTestSuite(APITestCase):
@@ -15,7 +14,7 @@ class POSTTestSuite(APITestCase):
             "title": "assignment",
             "date": "2024-01-01",
             "time": "23:59",
-            "timezone": "GMT",
+            "utc_offset": "+2",
             "interval": "1y",
             "info": "description"
         }
@@ -49,12 +48,12 @@ class GETTestSuite(APITestCase):
         self.url = '/event/?query='  # '/event?query=' gets redirected here
         for i in range(1, 3):  # 1 and 2
             Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}')
-        self.timezone = get_local_timezone()
+        self.utc_offset = get_local_utc_offset()
         self.id1_dict = dict([('id', 1), ('type', 'other'), ('title', 'Title-1'), ('date', '2024-01-01'),
-                              ('time', DEFAULT_TIME), ('timezone', self.timezone), ('interval', 'once'),
+                              ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', 'once'),
                               ('info', None)])
         self.id2_dict = dict([('id', 2), ('type', 'other'), ('title', 'Title-2'), ('date', '2024-01-02'),
-                              ('time', DEFAULT_TIME), ('timezone', self.timezone), ('interval', 'once'),
+                              ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', 'once'),
                               ('info', None)])
 
     def test_get_using_equal_operator(self):

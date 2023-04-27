@@ -2,6 +2,7 @@ from django.db import models
 from rest_framework import serializers
 import re
 import time
+from celery import shared_task
 
 DEFAULT_TIME = '10:00'
 
@@ -45,6 +46,10 @@ class Event(models.Model):
     utc_offset = models.CharField(max_length=255, default=get_local_utc_offset(), validators=[utc_offset_validator])
     interval = models.CharField(max_length=255, default='once')
     info = models.TextField(max_length=3000, null=True, blank=True)
+
+    @shared_task()
+    def send_notification(self):
+        print(self.pk)
 
     def __str__(self):
         return f'{self.type} - {self.title}'

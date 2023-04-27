@@ -1,5 +1,6 @@
 from celery import shared_task
-from django.core.mail import send_mail
+from core.models import Event
+from datetime import datetime, timezone
 
 
 @shared_task()
@@ -11,4 +12,8 @@ def send_email(pk):
 
 @shared_task()
 def heartbeat():
-    print('BEAT')
+    print('HEARTBEAT')
+    current_datetime = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')
+    expired_events = Event.objects.filter(utc_datetime__lt=current_datetime)
+    for event in expired_events:
+        print(event.title)

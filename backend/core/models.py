@@ -2,7 +2,7 @@ from django.db import models
 from rest_framework import serializers
 import re
 import time
-from celery import shared_task
+from datetime import datetime, timedelta
 
 DEFAULT_TIME = '10:00'
 
@@ -38,18 +38,32 @@ def get_local_utc_offset():
     return result
 
 
+def calculate_utc_time(local_date, local_time, utc_offset):
+    datetime_str = f'{local_date} {local_time}'
+    datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
+    plus_or_minus = 1 if utc_offset[0] == '+' else -1
+    offset_split = [int(x) for x in utc_offset[1:].split(':')]
+    offset_h = offset_split[0]
+    offset_min = 0
+    if len(offset_split) > 1:
+        offset_min = offset_split[1]
+    utc_datetime_object = datetime_object + plus_or_minus * timedelta(hours=offset_h, minutes=offset_min)
+    return utc_datetime_object.strftime('%Y-%m-%d %H:%M')
+
+
 class Event(models.Model):
     type = models.CharField(max_length=255, default='other')
     title = models.CharField(max_length=255)
     date = models.CharField(max_length=255, validators=[date_validator])
     time = models.CharField(max_length=255, default=DEFAULT_TIME, validators=[time_validator])
     utc_offset = models.CharField(max_length=255, default=get_local_utc_offset(), validators=[utc_offset_validator])
+    utc_datetime = models.CharField(max_length=255, editable=False)
     interval = models.CharField(max_length=255, default='once')
     info = models.TextField(max_length=3000, null=True, blank=True)
 
-    @shared_task()
-    def send_notification(self):
-        print(self.pk)
+    def save(self, *args, **kwargs):
+        self.utc_datetime = calculate_utc_time(str(self.date), str(self.time), str(self.utc_offset))
+        super(Event, self).save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.type} - {self.title}'

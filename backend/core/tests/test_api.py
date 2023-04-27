@@ -31,13 +31,13 @@ class POSTTestSuite(APITestCase):
         data = self.data
         data.pop("title")
         response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_post_when_title_equals_blank(self):
         data = self.data
         data["title"] = ""
         response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class GETTestSuite(APITestCase):
@@ -147,4 +147,4 @@ class GETTestSuite(APITestCase):
         query = 'EQUAL(title,"Title-1"'  # Missing closing bracket
         url = self.url + query
         response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)

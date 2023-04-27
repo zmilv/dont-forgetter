@@ -6,14 +6,14 @@ from django.shortcuts import get_object_or_404
 from django.http import Http404
 import re
 
+QUERY_LIMIT = 5
+
 
 class EventsAPIView(views.APIView):
-    """
-    An APIView for storing and getting events.
-    """
+    """ An APIView for storing and getting events """
     serializer_class = EventsSerializer
 
-    """ POST request """
+    """ POST request: """
 
     def post(self, request):
         try:
@@ -30,9 +30,9 @@ class EventsAPIView(views.APIView):
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"result": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    """ GET request """
+    """ GET request: """
 
     @staticmethod
     def _equal_kwargs(prop, value):
@@ -88,7 +88,7 @@ class EventsAPIView(views.APIView):
             args = args.split(',')
         if not args:
             raise ValueError('No arguments provided')
-        args = [arg.strip('"') for arg in args]
+        args = [arg.strip('"').strip("'") for arg in args]
         return tuple(args)
 
     def parse_query(self, query):
@@ -116,10 +116,10 @@ class EventsAPIView(views.APIView):
             query = self.request.query_params.get('query', '')
             if not query:
                 # Get all entries if no query provided
-                queryset = Event.objects
+                queryset = Event.objects.all().order_by('date', 'time')[:QUERY_LIMIT]
             else:
-                queryset = self.get_queryset(*self.parse_query(query))
+                queryset = self.get_queryset(*self.parse_query(query)).order_by('date', 'time')[:QUERY_LIMIT]
             serializer = EventsSerializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:
-            return Response({"result": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

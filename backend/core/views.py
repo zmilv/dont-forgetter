@@ -116,9 +116,9 @@ class EventsAPIView(views.APIView):
             query = self.request.query_params.get('query', '')
             if not query:
                 # Get all entries if no query provided
-                queryset = Event.objects.all().order_by('date', 'time')[:QUERY_LIMIT]
+                queryset = Event.objects.all().order_by('utc_timestamp')[:QUERY_LIMIT]
             else:
-                queryset = self.get_queryset(*self.parse_query(query)).order_by('date', 'time')[:QUERY_LIMIT]
+                queryset = self.get_queryset(*self.parse_query(query)).order_by('utc_timestamp')[:QUERY_LIMIT]
             serializer = EventsSerializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:

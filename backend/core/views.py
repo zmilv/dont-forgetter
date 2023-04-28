@@ -13,8 +13,6 @@ class EventsAPIView(views.APIView):
     """ An APIView for storing and getting events """
     serializer_class = EventsSerializer
 
-    """ POST request: """
-
     def post(self, request):
         try:
             try:
@@ -26,7 +24,7 @@ class EventsAPIView(views.APIView):
                 serializer = EventsSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
-                return Response(serializer.data)
+                return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -120,6 +118,27 @@ class EventsAPIView(views.APIView):
             else:
                 queryset = self.get_queryset(*self.parse_query(query)).order_by('utc_timestamp')[:QUERY_LIMIT]
             serializer = EventsSerializer(queryset, many=True)
-            return Response(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class EventsAPIDetailView(views.APIView):
+    """ An APIView for getting and deleting specific events """
+
+    def get(self, request, id):
+        try:
+            event = Event.objects.get(pk=id)
+            serializer = EventsSerializer(event)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, id):
+        try:
+            if id:
+                event = Event.objects.get(pk=id)
+                event.delete()
+                return Response({"result": "success", "message": f"ID{id} deleted"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -1,7 +1,6 @@
 from celery import shared_task
-from core.models import Event
+from core.models import Event, parse_notice_time_or_interval
 from datetime import datetime, timezone, timedelta
-import re
 
 
 @shared_task()
@@ -10,23 +9,10 @@ def send_notification(event_pk):
     print(f'ID{event.pk} - Sending notification')
 
 
-def parse_interval(interval):
-    translation = {
-        'y': 'years',
-        'm': 'months',
-        'd': 'days',
-        'h': 'hours',
-        'min': 'minutes',
-    }
-    _, number, units = re.split('(\d+)', interval)
-    units = translation[units]
-    return {units: int(number)}
-
-
 def get_new_date_and_time(old_date, old_time, interval):
     datetime_str = f'{old_date} {old_time}'
     datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d %H:%M')
-    datetime_object += timedelta(**parse_interval(interval))
+    datetime_object += timedelta(**parse_notice_time_or_interval(interval))
     datetime_str = datetime.strftime(datetime_object, '%Y-%m-%d %H:%M')
     new_date = datetime_str[:10]
     new_time = datetime_str[-5:]
@@ -36,7 +22,7 @@ def get_new_date_and_time(old_date, old_time, interval):
 @shared_task()
 def reschedule_or_delete_event(event_pk):
     event = Event.objects.get(pk=event_pk)
-    if event.interval == 'once':
+    if event.interval == '-':
         print(f'ID{event.pk} - Deleting')
         event.delete()
     else:

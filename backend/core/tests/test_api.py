@@ -16,6 +16,7 @@ class POSTTestSuite(APITestCase):
             "time": "23:59",
             "utc_offset": "+2",
             "interval": "10min",
+            "notice_time": "10min",
             "info": "description"
         }
         self.url = "/event/"
@@ -50,13 +51,13 @@ class GETTestSuite(APITestCase):
             Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}')
         self.utc_offset = get_utc_offset('2024-01-01')
         self.id1_dict = dict([('id', 1), ('type', 'other'), ('title', 'Title-1'), ('date', '2024-01-01'),
-                              ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', 'once'),
-                              ('utc_timestamp', get_utc_timestamp('2024-01-01', DEFAULT_TIME, self.utc_offset)),
-                              ('info', None)])
+                              ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', '-'),
+                              ('utc_timestamp', get_utc_timestamp('2024-01-01', DEFAULT_TIME, self.utc_offset, '-')),
+                              ('notice_time', '-'), ('info', None)])
         self.id2_dict = dict([('id', 2), ('type', 'other'), ('title', 'Title-2'), ('date', '2024-01-02'),
-                              ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', 'once'),
-                              ('utc_timestamp', get_utc_timestamp('2024-01-02', DEFAULT_TIME, self.utc_offset)),
-                              ('info', None)])
+                              ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', '-'),
+                              ('utc_timestamp', get_utc_timestamp('2024-01-02', DEFAULT_TIME, self.utc_offset, '-')),
+                              ('notice_time', '-'), ('info', None)])
 
     def test_get_using_equal_operator(self):
         query = 'EQUAL(title,"Title-1")'

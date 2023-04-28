@@ -18,6 +18,13 @@ def time_validator(value):
         raise serializers.ValidationError('Invalid time format. Valid format: hh:mm')
 
 
+def interval_validator(value):
+    regex = '^\d+(y|m|d|h|min)$'
+    if not re.fullmatch(regex, value):
+        raise serializers.ValidationError('Invalid interval format. Valid units: y, m, d, h, min. '
+                                          'Valid examples: 15min, 1y')
+
+
 def utc_offset_validator(value):
     regex = '^[+-]\d{1,2}:?\d{0,2}$'  # +/-h(:mm)
     if not re.fullmatch(regex, value):
@@ -60,7 +67,7 @@ class Event(models.Model):
     time = models.CharField(max_length=255, default=DEFAULT_TIME, validators=[time_validator])
     utc_offset = models.CharField(max_length=255, default='', validators=[utc_offset_validator])
     utc_timestamp = models.IntegerField(editable=False)
-    interval = models.CharField(max_length=255, default='once')
+    interval = models.CharField(max_length=255, default='once', validators=[interval_validator])
     info = models.TextField(max_length=3000, null=True, blank=True)
 
     def save(self, *args, **kwargs):

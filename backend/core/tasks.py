@@ -11,7 +11,15 @@ def send_notification(event_pk):
 
 
 def parse_interval(interval):
+    translation = {
+        'y': 'years',
+        'm': 'months',
+        'd': 'days',
+        'h': 'hours',
+        'min': 'minutes',
+    }
     _, number, units = re.split('(\d+)', interval)
+    units = translation[units]
     return {units: int(number)}
 
 

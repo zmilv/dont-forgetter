@@ -5,7 +5,7 @@ call venv/Scripts/activate.bat
 
 start /min cmd /C "cd backend & python manage.py runserver"
 start /min cmd /K "cd backend & celery -A backend worker -l info -P solo"
-start /min cmd /K "cd backend & celery -A backend beat"
+start /min cmd /K "cd backend & celery -A backend beat -s backend/celerybeat/celerybeat-schedule"
 
 timeout /t 3
 echo. & echo Upcoming events:

@@ -2,6 +2,7 @@ venv
 .idea
 .env
 backend/db.sqlite3
+backend/logs/*.log
 backend/backend/migrations
 backend/backend/celerybeat/celery*
 test.py

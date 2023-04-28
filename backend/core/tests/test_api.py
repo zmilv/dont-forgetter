@@ -15,7 +15,7 @@ class POSTTestSuite(APITestCase):
             "date": "2024-01-01",
             "time": "23:59",
             "utc_offset": "+2",
-            "interval": "1y",
+            "interval": "10minutes",
             "info": "description"
         }
         self.url = "/event/"

@@ -5,9 +5,12 @@ call venv/Scripts/activate.bat Rem Activate venv
 
 start /min cmd /C "cd backend & python manage.py test core.tests" Rem Run tests
 
-start /min cmd /C "cd backend & python manage.py runserver" Rem Start server
-start /min cmd /C "cd backend & celery -A backend worker -l info -P solo" Rem Start celery worker
-start /min cmd /C "cd backend & celery -A backend beat -s backend/celerybeat/celerybeat-schedule" Rem Start celery beat
+Rem Start server
+start /min cmd /K "cd backend & python manage.py runserver"
+Rem Start celery worker
+start /min cmd /K "cd backend & celery -A backend worker -l info -P solo"
+Rem Start celery beat
+start /min cmd /K "cd backend & celery -A backend beat -s backend/celerybeat/celerybeat-schedule"
 
 timeout /t 3
 echo. & echo Upcoming events:

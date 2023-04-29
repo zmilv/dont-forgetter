@@ -1,11 +1,13 @@
 @echo off
 
-cd /d %~dp0
-call venv/Scripts/activate.bat
+cd /d %~dp0 Rem Go to script location
+call venv/Scripts/activate.bat Rem Activate venv
 
-start /min cmd /C "cd backend & python manage.py runserver"
-start /min cmd /K "cd backend & celery -A backend worker -l info -P solo"
-start /min cmd /K "cd backend & celery -A backend beat -s backend/celerybeat/celerybeat-schedule"
+start /min cmd /C "cd backend & python manage.py test core.tests" Rem Run tests
+
+start /min cmd /C "cd backend & python manage.py runserver" Rem Start server
+start /min cmd /C "cd backend & celery -A backend worker -l info -P solo" Rem Start celery worker
+start /min cmd /C "cd backend & celery -A backend beat -s backend/celerybeat/celerybeat-schedule" Rem Start celery beat
 
 timeout /t 3
 echo. & echo Upcoming events:

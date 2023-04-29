@@ -3,6 +3,7 @@ venv
 .env
 backend/db.sqlite3
 backend/logs/*.log
+backend/.coverage
 backend/backend/migrations
 backend/backend/celerybeat/celery*
 test.py

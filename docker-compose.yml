@@ -1,0 +1,66 @@
+version: "3.11"
+
+services:
+  django:
+    build: .
+    container_name: django
+    command: python backend/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/usr/src/app
+      - logs:/usr/src/app/logs
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=password123
+      - DJANGO_ALLOWED_HOSTS=* localhost 127.0.0.1 [::1]
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_HOST_USER=name@mail.com
+      - EMAIL_HOST_PASSWORD=password123
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+
+  celery:
+    build: .
+    working_dir: /usr/src/app/backend
+    command: celery -A backend worker -l INFO
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=password123
+      - DJANGO_ALLOWED_HOSTS=* localhost 127.0.0.1 [::1]
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_HOST_USER=name@mail.com
+      - EMAIL_HOST_PASSWORD=password123
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - django
+      - redis
+
+  celery-beat:
+    build: .
+    working_dir: /usr/src/app/backend
+    command: celery -A backend beat -s backend/celerybeat/celerybeat-schedule
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=Password123
+      - DJANGO_ALLOWED_HOSTS=* localhost 127.0.0.1 [::1]
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_HOST_USER=name@mail.com
+      - EMAIL_HOST_PASSWORD=password
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - celery
+
+  redis:
+    image: "redis:alpine"
+  
+volumes:
+  logs: {}

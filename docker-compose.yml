@@ -10,15 +10,8 @@ services:
       - logs:/usr/src/app/logs
     ports:
       - "8000:8000"
-    environment:
-      - DEBUG=1
-      - SECRET_KEY=password123
-      - DJANGO_ALLOWED_HOSTS=* localhost 127.0.0.1 [::1]
-      - EMAIL_HOST=smtp.gmail.com
-      - EMAIL_HOST_USER=name@mail.com
-      - EMAIL_HOST_PASSWORD=password123
-      - CELERY_BROKER=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
+    env_file:
+      - .env
     depends_on:
       - redis
 
@@ -28,15 +21,8 @@ services:
     command: celery -A backend worker -l INFO
     volumes:
       - .:/usr/src/app
-    environment:
-      - DEBUG=1
-      - SECRET_KEY=password123
-      - DJANGO_ALLOWED_HOSTS=* localhost 127.0.0.1 [::1]
-      - EMAIL_HOST=smtp.gmail.com
-      - EMAIL_HOST_USER=name@mail.com
-      - EMAIL_HOST_PASSWORD=password123
-      - CELERY_BROKER=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
+    env_file:
+      - .env
     depends_on:
       - django
       - redis
@@ -47,20 +33,13 @@ services:
     command: celery -A backend beat -s backend/celerybeat/celerybeat-schedule
     volumes:
       - .:/usr/src/app
-    environment:
-      - DEBUG=1
-      - SECRET_KEY=Password123
-      - DJANGO_ALLOWED_HOSTS=* localhost 127.0.0.1 [::1]
-      - EMAIL_HOST=smtp.gmail.com
-      - EMAIL_HOST_USER=name@mail.com
-      - EMAIL_HOST_PASSWORD=password
-      - CELERY_BROKER=redis://redis:6379/0
-      - CELERY_BACKEND=redis://redis:6379/0
+    env_file:
+      - .env
     depends_on:
       - celery
 
   redis:
     image: "redis:alpine"
-  
+
 volumes:
   logs: {}

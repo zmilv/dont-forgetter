@@ -4,7 +4,11 @@ services:
   django:
     build: .
     container_name: django
-    command: python backend/manage.py runserver 0.0.0.0:8000
+    working_dir: /usr/src/app/backend
+    command: >
+      sh -c "python manage.py makemigrations core &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/usr/src/app
       - logs:/usr/src/app/logs
@@ -14,6 +18,15 @@ services:
       - .env
     depends_on:
       - redis
+      - pgdb
+
+  pgdb:
+    image: postgres:15.2-alpine
+    container_name: pgdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
 
   celery:
     build: .
@@ -26,6 +39,7 @@ services:
     depends_on:
       - django
       - redis
+      - pgdb
 
   celery-beat:
     build: .
@@ -43,3 +57,4 @@ services:
 
 volumes:
   logs: {}
+  postgres_data:

@@ -3,6 +3,7 @@ from rest_framework import serializers
 import re
 from datetime import datetime, timedelta, timezone
 
+
 DEFAULT_TIME = '10:00'
 
 units_translation_dict = {
@@ -99,4 +100,4 @@ class Event(models.Model):
         super(Event, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.type} - {self.title}'
+        return f'ID{self.pk} - {self.title}({self.type})'

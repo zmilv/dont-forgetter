@@ -3,7 +3,6 @@ from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-
 class POSTTestSuite(APITestCase):
     """ Test suite for Events API POST requests """
 
@@ -50,11 +49,11 @@ class GETTestSuite(APITestCase):
         for i in range(1, 3):  # 1 and 2
             Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}')
         self.utc_offset = get_utc_offset('2024-01-01')
-        self.id1_dict = dict([('id', 1), ('type', 'other'), ('title', 'Title-1'), ('date', '2024-01-01'),
+        self.id1_dict = dict([('type', 'other'), ('title', 'Title-1'), ('date', '2024-01-01'),
                               ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', '-'),
                               ('utc_timestamp', get_utc_timestamp('2024-01-01', DEFAULT_TIME, self.utc_offset, '-')),
                               ('notice_time', '-'), ('info', None)])
-        self.id2_dict = dict([('id', 2), ('type', 'other'), ('title', 'Title-2'), ('date', '2024-01-02'),
+        self.id2_dict = dict([('type', 'other'), ('title', 'Title-2'), ('date', '2024-01-02'),
                               ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', '-'),
                               ('utc_timestamp', get_utc_timestamp('2024-01-02', DEFAULT_TIME, self.utc_offset, '-')),
                               ('notice_time', '-'), ('info', None)])
@@ -63,6 +62,8 @@ class GETTestSuite(APITestCase):
         query = 'EQUAL(title,"Title-1")'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -71,6 +72,8 @@ class GETTestSuite(APITestCase):
         query = 'equal(title,"Title-1")'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -79,6 +82,8 @@ class GETTestSuite(APITestCase):
         query = 'AND(EQUAL(title,"Title-1"),EQUAL(date,"2024-01-01"))'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -87,6 +92,8 @@ class GETTestSuite(APITestCase):
         query = 'AND(EQUAL(title,"Title-1"),LESS_THAN(date,"2024-01-02"))'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -95,6 +102,8 @@ class GETTestSuite(APITestCase):
         query = 'AND(EQUAL(title,"Title-1"),LESS_THAN(date,"2024-01-02"),GREATER_THAN(time,"09:00"))'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -103,6 +112,8 @@ class GETTestSuite(APITestCase):
         query = 'OR(EQUAL(title,"Title-1"),EQUAL(title,"Title-2"))'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict, self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -111,6 +122,8 @@ class GETTestSuite(APITestCase):
         query = 'OR(EQUAL(title,"Title-1"),GREATER_THAN(date,"2023-01-01"))'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict, self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -119,6 +132,8 @@ class GETTestSuite(APITestCase):
         query = 'NOT(EQUAL(title,"Title-1"))'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -127,6 +142,8 @@ class GETTestSuite(APITestCase):
         query = 'GREATER_THAN(date,"2024-01-01")'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -135,6 +152,8 @@ class GETTestSuite(APITestCase):
         query = 'LESS_THAN(date,"2024-01-02")'
         url = self.url + query
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -142,6 +161,8 @@ class GETTestSuite(APITestCase):
     def test_get_without_query(self):
         url = "/event/"
         response = self.client.get(url)
+        for result in response.data:
+            del result['id']
         expected_data = [self.id1_dict, self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)

@@ -37,32 +37,3 @@ class TestTasks(TestCase):
         self.assertEqual(Event.objects.get().title, "Title-1")
         self.assertEqual(Event.objects.get().date, "2024-01-01")
         self.assertEqual(Event.objects.get().time, "10:30")
-
-    # @patch('core.tasks.current_datetime', return_value=datetime(2024, 1, 2, 10, 0, tzinfo=timezone.utc))
-    # @patch('core.tasks.heartbeat.datetime.now', return_value=datetime(2024, 1, 2, 10, 0, tzinfo=timezone.utc))
-    # def test_heartbeat_with_interval(self):
-    #     Event.objects.create(title=f'Title-1', date='2022-01-01', interval='30min')
-    #     # with patch('celeryconfig.CELERY_ALWAYS_EAGER', True, create=True):
-    #     heartbeat.apply()
-    #     self.assertEqual(Event.objects.count(), 1)
-    #     self.assertEqual(Event.objects.get().title, "Title-1")
-    #     self.assertEqual(Event.objects.get().date, "2022-01-01")
-    #     self.assertEqual(Event.objects.get().time, "10:30")
-
-
-# class TestHeartbeat:
-#     @pytest.fixture(scope='session')
-#     def celery_config():
-#         return {
-#             'broker_url': 'amqp://',
-#             'result_backend': 'redis://'
-#         }
-
-    # @override_settings(CELERY_EAGER_PROPAGATES_EXCEPTIONS=True, CELERY_ALWAYS_EAGER=True, BROKER_BACKEND='memory')
-    # def test_heartbeat_with_interval(self):
-    #     Event.objects.create(title=f'Title-1', date='2022-01-01', interval='30min')
-    #     heartbeat()
-    #     self.assertEqual(Event.objects.count(), 1)
-    #     self.assertEqual(Event.objects.get().title, "Title-1")
-    #     self.assertEqual(Event.objects.get().date, "2022-01-01")
-    #     self.assertEqual(Event.objects.get().time, "10:30")

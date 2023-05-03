@@ -1,4 +1,4 @@
-from ..models import Event, DEFAULT_TIME, get_utc_offset, get_utc_timestamp
+from ..models import Event, DEFAULT_TIME
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -48,15 +48,12 @@ class GETTestSuite(APITestCase):
         self.url = '/event/?query='  # '/event?query=' gets redirected here
         for i in range(1, 3):  # 1 and 2
             Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}')
-        self.utc_offset = get_utc_offset('2024-01-01')
         self.id1_dict = dict([('type', 'other'), ('title', 'Title-1'), ('date', '2024-01-01'),
-                              ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', '-'),
-                              ('utc_timestamp', get_utc_timestamp('2024-01-01', DEFAULT_TIME, self.utc_offset, '-')),
-                              ('notice_time', '-'), ('info', None)])
+                              ('time', '10:00'), ('utc_offset', '+2'), ('interval', '-'),
+                              ('utc_timestamp', 1704096000), ('notice_time', '-'), ('info', None)])
         self.id2_dict = dict([('type', 'other'), ('title', 'Title-2'), ('date', '2024-01-02'),
-                              ('time', DEFAULT_TIME), ('utc_offset', self.utc_offset), ('interval', '-'),
-                              ('utc_timestamp', get_utc_timestamp('2024-01-02', DEFAULT_TIME, self.utc_offset, '-')),
-                              ('notice_time', '-'), ('info', None)])
+                              ('time', '10:00'), ('utc_offset', '+2'), ('interval', '-'),
+                              ('utc_timestamp', 1704182400), ('notice_time', '-'), ('info', None)])
 
     def test_get_using_equal_operator(self):
         query = 'EQUAL(title,"Title-1")'

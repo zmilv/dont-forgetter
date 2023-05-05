@@ -8,6 +8,8 @@ urlpatterns = router.urls
 
 urlpatterns += [
     path('admin/', admin.site.urls),
-    path('event/', views.EventsAPIView.as_view()),
-    path('event/<int:id>/', views.EventsAPIDetailView.as_view()),
+    path('event/', views.EventAPIView.as_view()),
+    path('event/<int:id>/', views.EventAPIDetailView.as_view()),
+    path('note/', views.NoteAPIView.as_view()),
+    path('note/<int:id>/', views.NoteAPIDetailView.as_view()),
 ]

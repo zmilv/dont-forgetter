@@ -82,6 +82,7 @@ def get_utc_timestamp(local_date, local_time, utc_offset, notice_time):
 
 
 class Event(models.Model):
+    id = models.AutoField(primary_key=True)
     type = models.CharField(max_length=255, default='other')
     title = models.CharField(max_length=255)
     date = models.CharField(max_length=255, validators=[date_validator])
@@ -100,4 +101,21 @@ class Event(models.Model):
         super(Event, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f'ID{self.pk} - {self.title}({self.type})'
+        return f'ID{self.pk}|{self.type} - {self.title}'
+
+
+class Note(models.Model):
+    id = models.AutoField(primary_key=True)
+    type = models.CharField(max_length=255, default='other')
+    title = models.CharField(max_length=255, null=True, blank=True)
+    info = models.TextField(max_length=3000)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.title:
+            self.title = str(self.info)[:50] + '...' if len(str(self.info)) > 50 else str(self.info)[:50]
+        super(Note, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f'ID{self.pk}|{self.type} - {self.title}'

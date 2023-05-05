@@ -189,7 +189,6 @@ class EventAPIDetailView(APIDetailView):
     """ An APIView for getting and deleting specific events """
     model = Event
     serializer_class = EventSerializer
-    order_by = 'utc_timestamp'
 
 
 class NoteAPIView(APIView):
@@ -203,4 +202,3 @@ class NoteAPIDetailView(APIDetailView):
     """ An APIView for getting and deleting specific notes """
     model = Note
     serializer_class = NoteSerializer
-    order_by = '-updated_at'

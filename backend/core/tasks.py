@@ -10,10 +10,12 @@ logger = logging.getLogger(__name__)
 def send_notification(event_pk):
     try:
         event = Event.objects.get(pk=event_pk)
-        logger.info(f'ID{event.pk} - Sending notification')
+        logger.info(f'{event} - Sending notification')
         logger.info(f'{event.date} {event.time}')
+        return None
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
+        raise
 
 
 def get_new_date_and_time(old_date, old_time, interval, current_utc_timestamp):
@@ -28,7 +30,8 @@ def get_new_date_and_time(old_date, old_time, interval, current_utc_timestamp):
         new_time = datetime_str[-5:]
         return new_date, new_time
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
+        raise
 
 
 @shared_task()
@@ -36,17 +39,19 @@ def reschedule_or_delete_event(event_pk, current_utc_timestamp):
     try:
         event = Event.objects.get(pk=event_pk)
         if event.interval == '-':
-            logger.info(f'ID{event.pk} - Deleting')
+            logger.info(f'{event} - Deleting')
             event.delete()
         else:
-            logger.info(f'ID{event.pk} - Rescheduling')
+            logger.info(f'{event} - Rescheduling')
             new_date, new_time = get_new_date_and_time(event.date, event.time, event.interval, current_utc_timestamp)
             event.date = new_date
             event.time = new_time
             logger.info(f'New: {event.date} {event.time}')
             event.save()
+            return None
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
+        raise
 
 
 @shared_task()
@@ -57,7 +62,11 @@ def heartbeat():
         logger.info(f'HEARTBEAT. UTC: {current_utc_timestamp}')
         expired_events = Event.objects.filter(utc_timestamp__lt=current_utc_timestamp)
         for event in expired_events:
-            logger.info(f'ID{event.pk} {event.title}({event.type}) - Expired')
-            chain(send_notification.delay(event.pk) | reschedule_or_delete_event.delay(event.pk, current_utc_timestamp))
+            logger.info(f'{event} - Expired')
+            chain_result = \
+                chain(send_notification.si(event.pk) | reschedule_or_delete_event.si(event.pk, current_utc_timestamp))()
+            return chain_result.as_list()
+        return None
     except Exception as e:
-        logger.error(e)
+        logger.exception(e)
+        raise

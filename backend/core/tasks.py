@@ -66,7 +66,7 @@ def heartbeat():
             chain_result = \
                 chain(send_notification.si(event.pk) | reschedule_or_delete_event.si(event.pk, current_utc_timestamp))()
             return chain_result.as_list()
-        return None
+        return []
     except Exception as e:
         logger.exception(e)
         raise

@@ -40,7 +40,7 @@ def utc_offset_validator(value):
         raise serializers.ValidationError('Invalid UTC offset format. Valid examples: +1, -2:30')
 
 
-def get_utc_offset(local_date):
+def get_utc_offset(local_date):  # Unused. Todo: derive from user location setting
     datetime_object = datetime.strptime(local_date, '%Y-%m-%d')
     local_timezone = datetime_object.astimezone()
     offset = local_timezone.utcoffset() // timedelta(minutes=1) / 60
@@ -90,12 +90,10 @@ class Event(models.Model):
     notice_time = models.CharField(max_length=255, default='-', validators=[interval_and_notice_validator])
     interval = models.CharField(max_length=255, default='-', validators=[interval_and_notice_validator])
     info = models.TextField(max_length=3000, null=True, blank=True)
-    utc_offset = models.CharField(max_length=255, default='', validators=[utc_offset_validator])
+    utc_offset = models.CharField(max_length=255, default='+0', validators=[utc_offset_validator])
     utc_timestamp = models.IntegerField(editable=False)
 
     def save(self, *args, **kwargs):
-        if not self.utc_offset:
-            self.utc_offset = get_utc_offset(str(self.date))
         self.utc_timestamp = get_utc_timestamp(str(self.date), str(self.time), str(self.utc_offset),
                                                str(self.notice_time))
         super(Event, self).save(*args, **kwargs)

@@ -52,11 +52,6 @@ class TestModelValidators(TestCase):
 class TestModelHelperFuncs(TestCase):
     """ Test suite for model helper functions """
 
-    def test_utc_offset(self):
-        result = get_utc_offset('2024-01-01')
-        expected_result = '+2'
-        self.assertEqual(result, expected_result)
-
     def test_parse_notice_time_or_interval(self):
         result = parse_notice_time_or_interval('15min')
         expected_result = {'minutes': 15}

@@ -49,11 +49,11 @@ class GETTestSuite(APITestCase):
         for i in range(1, 3):  # 1 and 2
             Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}')
         self.id1_dict = dict([('type', 'other'), ('title', 'Title-1'), ('date', '2024-01-01'),
-                              ('time', '10:00'), ('utc_offset', '+2'), ('interval', '-'),
-                              ('utc_timestamp', 1704096000), ('notice_time', '-'), ('info', None)])
+                              ('time', '10:00'), ('utc_offset', '+0'), ('interval', '-'),
+                              ('utc_timestamp', 1704103200), ('notice_time', '-'), ('info', None)])
         self.id2_dict = dict([('type', 'other'), ('title', 'Title-2'), ('date', '2024-01-02'),
-                              ('time', '10:00'), ('utc_offset', '+2'), ('interval', '-'),
-                              ('utc_timestamp', 1704182400), ('notice_time', '-'), ('info', None)])
+                              ('time', '10:00'), ('utc_offset', '+0'), ('interval', '-'),
+                              ('utc_timestamp', 1704189600), ('notice_time', '-'), ('info', None)])
 
     def test_get_using_equal_operator(self):
         query = 'EQUAL(title,"Title-1")'

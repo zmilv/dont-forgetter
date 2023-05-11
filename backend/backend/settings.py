@@ -2,10 +2,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 from celery.schedules import crontab
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+local_dotenv_location = os.path.join(BASE_DIR, '../env_vars/.env.local')
+load_dotenv(local_dotenv_location)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/

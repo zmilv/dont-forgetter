@@ -1,4 +1,4 @@
-from .serializers import EventSerializer, NoteSerializer
+from core.serializers import EventSerializer, NoteSerializer
 from rest_framework import views, status
 from rest_framework.response import Response
 from core.models import Event, Note

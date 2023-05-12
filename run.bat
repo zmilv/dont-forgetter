@@ -6,13 +6,14 @@ Rem Activate venv
 call venv/Scripts/activate.bat
 
 Rem Run tests and Start server
-start /min cmd /C "cd backend & python manage.py test core.tests && python manage.py runserver"
+start /min cmd /K "cd backend & python manage.py runserver"
 Rem Start celery worker
-start /min cmd /C "cd backend & celery -A backend worker -l info -P solo"
+start /min cmd /K "cd backend & celery -A backend worker -l info -P solo"
 Rem Start celery beat
 start /min cmd /K "cd backend & celery -A backend beat -s backend/celerybeat/celerybeat-schedule"
 
-timeout /t 3
+echo Note: Redis and Postgres need to be started separately (WSL recommended for Redis)
+timeout /t 5
 echo. & echo Upcoming events:
 curl http://127.0.0.1:8000/event/
 

@@ -123,10 +123,10 @@ class APIView(views.APIView, metaclass=ABCMeta):
             try:
                 # Update entry if one already exists
                 event_object = get_object_or_404(self.model, id=request.data.get('id'))
-                serializer = self.serializer_class(event_object, data=request.data)
+                serializer = self.serializer_class(event_object, data=request.data, context={'request': request})
             except Http404:
                 # Otherwise create new entry
-                serializer = self.serializer_class(data=request.data)
+                serializer = self.serializer_class(data=request.data, context={'request': request})
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)

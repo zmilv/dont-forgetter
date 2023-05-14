@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from rest_framework import serializers
 import re
 from datetime import datetime, timedelta, timezone
@@ -83,6 +84,10 @@ def get_utc_timestamp(local_date, local_time, utc_offset, notice_time):
 
 class Event(models.Model):
     id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     type = models.CharField(max_length=255, default='other')
     title = models.CharField(max_length=255)
     date = models.CharField(max_length=255, validators=[date_validator])
@@ -104,6 +109,10 @@ class Event(models.Model):
 
 class Note(models.Model):
     id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
     type = models.CharField(max_length=255, default='other')
     title = models.CharField(max_length=255, null=True, blank=True)
     info = models.TextField(max_length=3000)

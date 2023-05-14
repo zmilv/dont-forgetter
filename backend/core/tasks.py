@@ -17,15 +17,9 @@ def send_windows_popup(title, text):  # For local development only
 
 
 @shared_task()
-def send_email(title, text):
+def send_email(title, text, email):
     try:
-        send_mail(
-            title,
-            text,
-            None,
-            ["recipient@email.com"],  # Todo: Sync with user settings
-            fail_silently=False,
-        )
+        send_mail(title, text, None, [email], fail_silently=False)
         return None
     except Exception as e:
         logger.exception(e)
@@ -50,10 +44,10 @@ def send_notification(event_pk):
         event = Event.objects.get(pk=event_pk)
         logger.info(f'{event} - Sending notification')
         logger.info(f'{event.date} {event.time}')
-        notification_title = f'Time for {event.title}({event.type})!'
+        notification_title = f'Time for {event.title} ({event.type}) !'
         notification_text = build_notification_text(event)
         # send_windows_popup.delay(notification_title, notification_text)
-        send_email.delay(notification_title, notification_text)
+        send_email.delay(notification_title, notification_text, event.user.email)
         return None
     except Exception as e:
         logger.exception(e)

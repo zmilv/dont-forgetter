@@ -104,7 +104,7 @@ class Event(models.Model):
         super(Event, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f'ID{self.pk}|{self.type} - {self.title}'
+        return f'ID{self.pk}({self.user.pk})|{self.type} - {self.title}'
 
 
 class Note(models.Model):
@@ -125,4 +125,4 @@ class Note(models.Model):
         super(Note, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f'ID{self.pk}|{self.type} - {self.title}'
+        return f'ID{self.pk}({self.user.pk})|{self.type} - {self.title}'

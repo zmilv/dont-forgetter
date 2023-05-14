@@ -1,5 +1,6 @@
 from core.serializers import EventSerializer, NoteSerializer
 from rest_framework import views, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from core.models import Event, Note
 from django.shortcuts import get_object_or_404
@@ -115,6 +116,8 @@ class APIView(views.APIView, metaclass=ABCMeta):
     def order_by(self):
         pass
 
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
         try:
             try:
@@ -159,6 +162,8 @@ class APIDetailView(views.APIView, metaclass=ABCMeta):
     @abstractmethod
     def serializer_class(self):
         pass
+
+    permission_classes = (IsAuthenticated,)
 
     def get(self, request, id):
         try:

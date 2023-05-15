@@ -68,7 +68,7 @@ This application can be useful for a variety of scenarios, such as personal to-d
 | less_than    | less_than(time,"17:00")                             |
 
 ### Current architecture
-![](../../../../Downloads/df-current-architecture_k30lF0D.png)
+![df-current-architecture_k30lF0D](https://github.com/zmilv/dont-forgetter/assets/27917439/87dcd5c5-b97d-48a0-844c-c1bff60c89d4)
 
 ### Future plans
 - React Native front-end

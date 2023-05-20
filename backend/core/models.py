@@ -30,7 +30,7 @@ def time_validator(value):
 
 def interval_and_notice_validator(value):
     regex = '^\d+(y|m|d|h|min)$'
-    if not re.fullmatch(regex, value):
+    if not re.fullmatch(regex, value) and value != '-':
         raise serializers.ValidationError('Invalid interval/notice format. Valid units: y, m, d, h, min. '
                                           'Valid examples: 15min, 1y')
 

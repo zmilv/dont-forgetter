@@ -17,10 +17,10 @@ This application can be useful for a variety of scenarios, such as personal to-d
 > If using the API via browser, Django session authentication will be used.
 > Otherwise, JWT bearer token needs to be provided in request headers.
 > #### Account endpoints
-> - register/ - register an account
-> - login/ - log into an account and get a JWT
-> - token/refresh/ - refresh a JWT
-> - logout/ - log out of an account
+> - POST register/ - register an account
+> - POST login/ - log into an account and get a JWT
+> - POST token/refresh/ - refresh a JWT
+> - POST logout/ - log out of an account
 > #### Event endpoints
 > - POST event/ - add an event
 > - GET event/ - get details about the closest events
@@ -58,7 +58,7 @@ This application can be useful for a variety of scenarios, such as personal to-d
 | updated_at | string (automatic)  | "2023-05-15 14:00" |
 
 ### Queries
-| Operator     | Example                                             |
+| Operator     | Examples                                            |
 |--------------|-----------------------------------------------------|
 | equal        | equal(type,"birthday")                              |
 | and          | and(equal(type,"uni"),less_than(date,"2023-05-16")) |

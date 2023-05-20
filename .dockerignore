@@ -1,7 +1,8 @@
-.venv
 .git
 .idea
 .gitignore
+.pytest_cache
+venv
 gitignore
 logs
 run.bat

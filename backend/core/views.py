@@ -98,6 +98,9 @@ class APIQueryFuncs:
             return operator_func(*args)
 
 
+ownership_error_message = 'You are not the owner of this object'
+
+
 class APIView(views.APIView, metaclass=ABCMeta):
     """ An abstract class for building API views for different models """
 
@@ -123,6 +126,9 @@ class APIView(views.APIView, metaclass=ABCMeta):
             try:
                 # Update entry if one already exists
                 event_object = get_object_or_404(self.model, id=request.data.get('id'))
+                if event_object.user != request.user:
+                    return Response({"result": "error", "message": ownership_error_message},
+                                    status=status.HTTP_403_FORBIDDEN)
                 serializer = self.serializer_class(event_object, data=request.data, context={'request': request})
             except Http404:
                 # Otherwise create new entry
@@ -137,13 +143,15 @@ class APIView(views.APIView, metaclass=ABCMeta):
 
     def get(self, request):
         try:
+            user = request.user
             query = self.request.query_params.get('query', '')
             if not query:
                 # Get all entries if no query provided
-                queryset = self.model.objects.all().order_by(self.order_by)[:QUERY_LIMIT]
+                queryset = self.model.objects.all().filter(user=user).order_by(self.order_by)[:QUERY_LIMIT]
             else:
                 queryset = APIQueryFuncs.get_queryset(*APIQueryFuncs.parse_query(query), queryset=self.model.
-                                                      objects.all()).order_by(self.order_by)[:QUERY_LIMIT]
+                                                      objects.all().filter(user=user)). \
+                                                        order_by(self.order_by)[:QUERY_LIMIT]
             serializer = self.serializer_class(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -168,17 +176,22 @@ class APIDetailView(views.APIView, metaclass=ABCMeta):
     def get(self, request, id):
         try:
             event = self.model.objects.get(pk=id)
-            serializer = self.serializer_class(event)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            if event.user == request.user:
+                serializer = self.serializer_class(event)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"result": "error", "message": ownership_error_message},
+                            status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def delete(self, request, id):
         try:
-            if id:
-                event = self.model.objects.get(pk=id)
+            event = self.model.objects.get(pk=id)
+            if event.user == request.user:
                 event.delete()
                 return Response({"result": "success", "message": f"ID{id} deleted"}, status=status.HTTP_200_OK)
+            return Response({"result": "error", "message": ownership_error_message},
+                            status=status.HTTP_403_FORBIDDEN)
         except Exception as e:
             return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

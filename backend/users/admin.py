@@ -1,7 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .forms import CustomUserChangeForm, CustomUserCreationForm
-from .models import CustomUser
+from users.forms import CustomUserChangeForm, CustomUserCreationForm
+from users.models import CustomUser, UserSettings
+
+
+class UserSettingsInline(admin.StackedInline):
+    model = UserSettings
+    can_delete = False
+    verbose_name_plural = "UserSettings"
 
 
 @admin.register(CustomUser)
@@ -54,3 +60,7 @@ class CustomUserAdmin(UserAdmin):
     )
     search_fields = ("email",)
     ordering = ("email",)
+    inlines = (UserSettingsInline,)
+
+
+admin.site.register(UserSettings)

@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate
 from rest_framework import serializers
-from users.models import CustomUser
+from users.models import CustomUser, UserSettings
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -40,3 +40,13 @@ class UserLoginSerializer(serializers.Serializer):
         if user and user.is_active:
             return user
         raise serializers.ValidationError("Incorrect Credentials")
+
+
+class UserSettingsSerializer(CustomUserSerializer):
+    """
+    Serializer class to serialize the UserSettings model
+    """
+
+    class Meta:
+        model = UserSettings
+        fields = ("default_time",)

@@ -129,7 +129,8 @@ class APIView(views.APIView, metaclass=ABCMeta):
                 if event_object.user != request.user:
                     return Response({"result": "error", "message": ownership_error_message},
                                     status=status.HTTP_403_FORBIDDEN)
-                serializer = self.serializer_class(event_object, data=request.data, context={'request': request})
+                serializer = self.serializer_class(event_object, data=request.data, context={'request': request},
+                                                   partial=True)
             except Http404:
                 # Otherwise create new entry
                 serializer = self.serializer_class(data=request.data, context={'request': request})

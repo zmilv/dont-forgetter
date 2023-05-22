@@ -1,44 +1,10 @@
 from django.db import models
 from django.conf import settings
-from rest_framework import serializers
-import re
+from core.validators import units_translation_dict, date_validator, time_validator, interval_and_notice_validator,\
+    utc_offset_validator
+from users.models import UserSettings
 from datetime import datetime, timedelta, timezone
-
-
-DEFAULT_TIME = '10:00'
-
-units_translation_dict = {
-        'y': 'years',
-        'm': 'months',
-        'd': 'days',
-        'h': 'hours',
-        'min': 'minutes',
-    }
-
-
-def date_validator(value):
-    regex = '^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$'  # yyyy-mm-dd
-    if not re.fullmatch(regex, value):
-        raise serializers.ValidationError('Invalid date format. Valid format: yyyy-mm-hh')
-
-
-def time_validator(value):
-    regex = '^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$'  # hh:mm
-    if not re.fullmatch(regex, value):
-        raise serializers.ValidationError('Invalid time format. Valid format: hh:mm')
-
-
-def interval_and_notice_validator(value):
-    regex = '^\d+(y|m|d|h|min)$'
-    if not re.fullmatch(regex, value) and value != '-':
-        raise serializers.ValidationError('Invalid interval/notice format. Valid units: y, m, d, h, min. '
-                                          'Valid examples: 15min, 1y')
-
-
-def utc_offset_validator(value):
-    regex = '^[+-]\d{1,2}:?\d{0,2}$'  # +/-h(:mm)
-    if not re.fullmatch(regex, value):
-        raise serializers.ValidationError('Invalid UTC offset format. Valid examples: +1, -2:30')
+import re
 
 
 def get_utc_offset(local_date):  # Unused. Todo: derive from user location setting
@@ -91,7 +57,7 @@ class Event(models.Model):
     type = models.CharField(max_length=255, default='other')
     title = models.CharField(max_length=255)
     date = models.CharField(max_length=255, validators=[date_validator])
-    time = models.CharField(max_length=255, default=DEFAULT_TIME, validators=[time_validator])
+    time = models.CharField(max_length=255, default='', validators=[time_validator])
     notice_time = models.CharField(max_length=255, default='-', validators=[interval_and_notice_validator])
     interval = models.CharField(max_length=255, default='-', validators=[interval_and_notice_validator])
     info = models.TextField(max_length=3000, null=True, blank=True)
@@ -99,6 +65,9 @@ class Event(models.Model):
     utc_timestamp = models.IntegerField(editable=False)
 
     def save(self, *args, **kwargs):
+        if not self.time:
+            user_settings = UserSettings.objects.get(user=self.user)
+            self.time = user_settings.default_time
         self.utc_timestamp = get_utc_timestamp(str(self.date), str(self.time), str(self.utc_offset),
                                                str(self.notice_time))
         super(Event, self).save(*args, **kwargs)

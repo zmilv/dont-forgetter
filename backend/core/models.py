@@ -65,9 +65,11 @@ class Event(models.Model):
     utc_timestamp = models.IntegerField(editable=False)
 
     def save(self, *args, **kwargs):
+        user_settings = UserSettings.objects.get(user=self.user)
         if not self.time:
-            user_settings = UserSettings.objects.get(user=self.user)
             self.time = user_settings.default_time
+        if not self.utc_offset:
+            self.utc_offset = user_settings.default_utc_offset
         self.utc_timestamp = get_utc_timestamp(str(self.date), str(self.time), str(self.utc_offset),
                                                str(self.notice_time))
         super(Event, self).save(*args, **kwargs)

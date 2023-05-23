@@ -54,14 +54,14 @@ class Event(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    type = models.CharField(max_length=255, default='other')
-    title = models.CharField(max_length=255)
-    date = models.CharField(max_length=255, validators=[date_validator])
-    time = models.CharField(max_length=255, default='', validators=[time_validator])
-    notice_time = models.CharField(max_length=255, default='-', validators=[interval_and_notice_validator])
-    interval = models.CharField(max_length=255, default='-', validators=[interval_and_notice_validator])
+    type = models.CharField(max_length=70, default='other')
+    title = models.CharField(max_length=100)
+    date = models.CharField(max_length=10, validators=[date_validator])
+    time = models.CharField(max_length=5, default='', validators=[time_validator])
+    notice_time = models.CharField(max_length=15, default='-', validators=[interval_and_notice_validator])
+    interval = models.CharField(max_length=15, default='-', validators=[interval_and_notice_validator])
     info = models.TextField(max_length=3000, null=True, blank=True)
-    utc_offset = models.CharField(max_length=255, default='+0', validators=[utc_offset_validator])
+    utc_offset = models.CharField(max_length=6, default='', validators=[utc_offset_validator])
     utc_timestamp = models.IntegerField(editable=False)
 
     def save(self, *args, **kwargs):

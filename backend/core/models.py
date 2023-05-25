@@ -3,6 +3,7 @@ from django.conf import settings
 from core.validators import units_translation_dict, date_validator, time_validator, interval_and_notice_validator,\
     utc_offset_validator
 from users.models import UserSettings
+from django_cryptography.fields import encrypt
 from datetime import datetime, timedelta, timezone
 import re
 
@@ -54,13 +55,13 @@ class Event(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    type = models.CharField(max_length=70, default='other')
-    title = models.CharField(max_length=100)
+    type = encrypt(models.CharField(max_length=70, default='other'))
+    title = encrypt(models.CharField(max_length=100))
     date = models.CharField(max_length=10, validators=[date_validator])
     time = models.CharField(max_length=5, default='', validators=[time_validator])
     notice_time = models.CharField(max_length=15, default='-', validators=[interval_and_notice_validator])
     interval = models.CharField(max_length=15, default='-', validators=[interval_and_notice_validator])
-    info = models.TextField(max_length=3000, null=True, blank=True)
+    info = encrypt(models.TextField(max_length=3000, null=True, blank=True))
     utc_offset = models.CharField(max_length=6, default='', validators=[utc_offset_validator])
     utc_timestamp = models.IntegerField(editable=False)
 
@@ -84,9 +85,9 @@ class Note(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    type = models.CharField(max_length=255, default='other')
-    title = models.CharField(max_length=255, null=True, blank=True)
-    info = models.TextField(max_length=3000)
+    type = encrypt(models.CharField(max_length=255, default='other'))
+    title = encrypt(models.CharField(max_length=255, null=True, blank=True))
+    info = encrypt(models.TextField(max_length=3000))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

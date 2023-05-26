@@ -79,25 +79,22 @@ class TestTasks(TestCase):
 class TestCeleryIntegration(SimpleTestCase):
     databases = "__all__"
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user = CustomUser.objects.create_user(
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
             email="email@email.com", username="name", password=make_password("password")
         )
         # Start celery worker
-        cls.celery_worker = start_worker(app, perform_ping_check=False)
-        cls.celery_worker.__enter__()
+        self.celery_worker = start_worker(app, perform_ping_check=False)
+        self.celery_worker.__enter__()
 
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
+    def tearDown(self):
         # Close worker
-        cls.celery_worker.__exit__(None, None, None)
+        self.celery_worker.__exit__(None, None, None)
 
     def _post_teardown(self):
-        # Clear Event instances after each test
+        # Clear Event and CustomUser instances after each test
         Event.objects.all().delete()
+        CustomUser.objects.all().delete()
 
     def test_heartbeat_without_interval(self):
         Event.objects.create(

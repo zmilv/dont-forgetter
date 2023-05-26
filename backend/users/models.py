@@ -20,8 +20,12 @@ class CustomUser(AbstractUser):
 
 class UserSettings(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    default_time = models.CharField(max_length=5, default='10:00', validators=[time_validator])
-    default_utc_offset = models.CharField(max_length=6, default='+0', validators=[utc_offset_validator])
+    default_time = models.CharField(
+        max_length=5, default="10:00", validators=[time_validator]
+    )
+    default_utc_offset = models.CharField(
+        max_length=6, default="+0", validators=[utc_offset_validator]
+    )
 
     def __str__(self):
         return self.user.email

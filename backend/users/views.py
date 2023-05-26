@@ -11,7 +11,7 @@ User = get_user_model()
 
 
 class UserRegisterationAPIView(GenericAPIView):
-    """ An endpoint for the client to create a new User. """
+    """An endpoint for the client to create a new User."""
 
     permission_classes = (AllowAny,)
     serializer_class = serializers.UserRegisterationSerializer
@@ -27,7 +27,7 @@ class UserRegisterationAPIView(GenericAPIView):
 
 
 class UserLoginAPIView(GenericAPIView):
-    """ An endpoint to authenticate existing users using their email and password. """
+    """An endpoint to authenticate existing users using their email and password."""
 
     permission_classes = (AllowAny,)
     serializer_class = serializers.UserLoginSerializer
@@ -44,7 +44,7 @@ class UserLoginAPIView(GenericAPIView):
 
 
 class UserLogoutAPIView(GenericAPIView):
-    """ An endpoint to logout users. """
+    """An endpoint to logout users."""
 
     permission_classes = (IsAuthenticated,)
 
@@ -59,7 +59,7 @@ class UserLogoutAPIView(GenericAPIView):
 
 
 class UserAPIView(RetrieveUpdateAPIView):
-    """ Get, Update user information """
+    """Get, Update user information"""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.CustomUserSerializer
@@ -69,7 +69,7 @@ class UserAPIView(RetrieveUpdateAPIView):
 
 
 class UserSettingsAPIView(views.APIView):
-    """ Get, Update user settings """
+    """Get, Update user settings"""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.UserSettingsSerializer
@@ -77,15 +77,22 @@ class UserSettingsAPIView(views.APIView):
     def post(self, request):
         try:
             settings_object = request.user.usersettings
-            serializer = self.serializer_class(settings_object, data=request.data,
-                                                            context={'request': request}, partial=True)
+            serializer = self.serializer_class(
+                settings_object,
+                data=request.data,
+                context={"request": request},
+                partial=True,
+            )
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"result": "error", "message": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def get(self, request):
         try:
@@ -93,4 +100,7 @@ class UserSettingsAPIView(views.APIView):
             serializer = self.serializer_class(settings_object, many=False)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"result": "error", "message": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"result": "error", "message": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

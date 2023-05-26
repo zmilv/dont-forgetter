@@ -7,7 +7,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = '__all__'
+        fields = "__all__"
 
 
 class NoteSerializer(serializers.ModelSerializer):
@@ -15,4 +15,4 @@ class NoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Note
-        fields = '__all__'
+        fields = "__all__"

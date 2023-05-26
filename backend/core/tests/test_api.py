@@ -6,13 +6,11 @@ from django.contrib.auth.hashers import make_password
 
 
 class POSTTestSuite(APITestCase):
-    """ Test suite for Events API POST requests """
+    """Test suite for Events API POST requests"""
 
     def setUp(self):
         self.user = CustomUser.objects.create_user(
-            email='email@email.com',
-            username='name',
-            password=make_password('password')
+            email="email@email.com", username="name", password=make_password("password")
         )
         self.client.force_authenticate(self.user)
         self.data = {
@@ -23,7 +21,7 @@ class POSTTestSuite(APITestCase):
             "utc_offset": "+2",
             "interval": "10min",
             "notice_time": "10min",
-            "info": "description"
+            "info": "description",
         }
         self.url = "/event/"
 
@@ -48,31 +46,51 @@ class POSTTestSuite(APITestCase):
 
 
 class GETTestSuite(APITestCase):
-    """ Test suite for Events API GET requests """
+    """Test suite for Events API GET requests"""
 
     def setUp(self):
         self.user = CustomUser.objects.create_user(
-            email='email@email.com',
-            username='name',
-            password=make_password('password')
+            email="email@email.com", username="name", password=make_password("password")
         )
         self.client.force_authenticate(self.user)
-        self.url = '/event/?query='  # '/event?query=' gets redirected here
+        self.url = "/event/?query="  # '/event?query=' gets redirected here
         for i in range(1, 3):  # 1 and 2
-            Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}', user=self.user)
-        self.id1_dict = dict([('type', 'other'), ('title', 'Title-1'), ('date', '2024-01-01'),
-                              ('time', '10:00'), ('utc_offset', '+0'), ('interval', '-'),
-                              ('utc_timestamp', 1704103200), ('notice_time', '-'), ('info', None)])
-        self.id2_dict = dict([('type', 'other'), ('title', 'Title-2'), ('date', '2024-01-02'),
-                              ('time', '10:00'), ('utc_offset', '+0'), ('interval', '-'),
-                              ('utc_timestamp', 1704189600), ('notice_time', '-'), ('info', None)])
+            Event.objects.create(
+                title=f"Title-{i}", date=f"2024-01-0{i}", user=self.user
+            )
+        self.id1_dict = dict(
+            [
+                ("type", "other"),
+                ("title", "Title-1"),
+                ("date", "2024-01-01"),
+                ("time", "10:00"),
+                ("utc_offset", "+0"),
+                ("interval", "-"),
+                ("utc_timestamp", 1704103200),
+                ("notice_time", "-"),
+                ("info", None),
+            ]
+        )
+        self.id2_dict = dict(
+            [
+                ("type", "other"),
+                ("title", "Title-2"),
+                ("date", "2024-01-02"),
+                ("time", "10:00"),
+                ("utc_offset", "+0"),
+                ("interval", "-"),
+                ("utc_timestamp", 1704189600),
+                ("notice_time", "-"),
+                ("info", None),
+            ]
+        )
 
     def test_get_using_equal_operator(self):
         query = 'EQUAL(title,"Title-1")'
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -82,7 +100,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -92,7 +110,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -102,7 +120,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -112,7 +130,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -122,7 +140,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict, self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -132,7 +150,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict, self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -142,7 +160,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -152,7 +170,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -162,7 +180,7 @@ class GETTestSuite(APITestCase):
         url = self.url + query
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
@@ -171,7 +189,7 @@ class GETTestSuite(APITestCase):
         url = "/event/"
         response = self.client.get(url)
         for result in response.data:
-            del result['id']
+            del result["id"]
         expected_data = [self.id1_dict, self.id2_dict]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)

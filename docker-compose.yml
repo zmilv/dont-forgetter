@@ -6,7 +6,8 @@ services:
     container_name: django
     working_dir: /usr/src/app/backend
     command: >
-      sh -c "python manage.py makemigrations &&
+      sh -c "python manage.py makemigrations core &&
+             python manage.py makemigrations users &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     volumes:

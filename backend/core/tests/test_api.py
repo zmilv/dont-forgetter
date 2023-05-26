@@ -1,13 +1,20 @@
-from ..models import Event, DEFAULT_TIME
-from rest_framework.test import APIClient
+from core.models import Event
+from users.models import CustomUser
 from rest_framework.test import APITestCase
 from rest_framework import status
+from django.contrib.auth.hashers import make_password
+
 
 class POSTTestSuite(APITestCase):
     """ Test suite for Events API POST requests """
 
     def setUp(self):
-        self.client = APIClient()
+        self.user = CustomUser.objects.create_user(
+            email='email@email.com',
+            username='name',
+            password=make_password('password')
+        )
+        self.client.force_authenticate(self.user)
         self.data = {
             "type": "uni",
             "title": "assignment",
@@ -44,10 +51,15 @@ class GETTestSuite(APITestCase):
     """ Test suite for Events API GET requests """
 
     def setUp(self):
-        self.client = APIClient()
+        self.user = CustomUser.objects.create_user(
+            email='email@email.com',
+            username='name',
+            password=make_password('password')
+        )
+        self.client.force_authenticate(self.user)
         self.url = '/event/?query='  # '/event?query=' gets redirected here
         for i in range(1, 3):  # 1 and 2
-            Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}')
+            Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}', user=self.user)
         self.id1_dict = dict([('type', 'other'), ('title', 'Title-1'), ('date', '2024-01-01'),
                               ('time', '10:00'), ('utc_offset', '+0'), ('interval', '-'),
                               ('utc_timestamp', 1704103200), ('notice_time', '-'), ('info', None)])

@@ -1,6 +1,8 @@
 from django.test import TestCase
 from core.models import Event
 from core.views import APIQueryFuncs
+from users.models import CustomUser
+from django.contrib.auth.hashers import make_password
 
 
 class TestAPIQueryFuncs(TestCase):
@@ -9,8 +11,13 @@ class TestAPIQueryFuncs(TestCase):
     """
 
     def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            email='email@email.com',
+            username='name',
+            password=make_password('password')
+        )
         for i in range(1, 3):  # 1 and 2
-            Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}')
+            Event.objects.create(title=f'Title-{i}', date=f'2024-01-0{i}', user=self.user)
         self.query_funcs_instance = APIQueryFuncs()
 
     def test_equal_kwargs(self):

@@ -1,13 +1,16 @@
-from django.test import TestCase, SimpleTestCase
-from core.tasks import get_new_date_and_time, reschedule_or_delete_event, heartbeat
-from core.models import Event
 from datetime import datetime, timezone
-from backend.celery import app
+
 from celery.contrib.testing.worker import start_worker
 from celery.result import AsyncResult
-from freezegun import freeze_time
-from users.models import CustomUser
 from django.contrib.auth.hashers import make_password
+from django.test import SimpleTestCase, TestCase
+from freezegun import freeze_time
+
+from backend.celery import app
+from core.models import Event
+from core.tasks import (get_new_date_and_time, heartbeat,
+                        reschedule_or_delete_event)
+from users.models import CustomUser
 
 
 class TestTasks(TestCase):

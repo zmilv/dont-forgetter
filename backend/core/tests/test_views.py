@@ -1,8 +1,9 @@
+from django.contrib.auth.hashers import make_password
 from django.test import TestCase
+
 from core.models import Event
 from core.views import APIQueryFuncs
 from users.models import CustomUser
-from django.contrib.auth.hashers import make_password
 
 
 class TestAPIQueryFuncs(TestCase):

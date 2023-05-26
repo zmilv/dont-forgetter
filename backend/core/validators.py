@@ -1,6 +1,6 @@
-from rest_framework import serializers
 import re
 
+from rest_framework import serializers
 
 units_translation_dict = {
     "y": "years",

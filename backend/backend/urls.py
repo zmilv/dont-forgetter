@@ -1,7 +1,8 @@
 from django.contrib import admin
-from django.urls import path, include
-from core import views
+from django.urls import include, path
 from rest_framework import routers
+
+from core import views
 
 router = routers.DefaultRouter()
 urlpatterns = router.urls

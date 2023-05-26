@@ -1,8 +1,10 @@
-from celery import shared_task, chain
-from core.models import Event, parse_notice_time_or_interval
-from datetime import datetime, timezone, timedelta
 import logging
+from datetime import datetime, timedelta, timezone
+
+from celery import chain, shared_task
 from django.core.mail import send_mail
+
+from core.models import Event, parse_notice_time_or_interval
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +50,7 @@ def send_notification(event_pk):
         notification_title = f"Time for {event.title} ({event.type}) !"
         notification_text = build_notification_text(event)
         # send_windows_popup.delay(notification_title, notification_text)
-        # send_email.delay(notification_title, notification_text, event.user.email)
+        send_email.delay(notification_title, notification_text, event.user.email)
         return None
     except Exception as e:
         logger.exception(e)

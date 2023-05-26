@@ -1,19 +1,15 @@
-from django.test import TestCase
-from core.models import (
-    Event,
-    time_validator,
-    date_validator,
-    interval_and_notice_validator,
-    utc_offset_validator,
-    get_utc_offset,
-    parse_notice_time_or_interval,
-    apply_utc_offset,
-    get_utc_timestamp,
-)
-from rest_framework.serializers import ValidationError
 from datetime import datetime, timezone
-from users.models import CustomUser
+
 from django.contrib.auth.hashers import make_password
+from django.test import TestCase
+from rest_framework.serializers import ValidationError
+
+from core.models import (Event, apply_utc_offset, date_validator,
+                         get_utc_offset, get_utc_timestamp,
+                         interval_and_notice_validator,
+                         parse_notice_time_or_interval, time_validator,
+                         utc_offset_validator)
+from users.models import CustomUser
 
 
 class TestModelValidators(TestCase):

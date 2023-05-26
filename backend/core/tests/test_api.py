@@ -1,8 +1,9 @@
+from django.contrib.auth.hashers import make_password
+from rest_framework import status
+from rest_framework.test import APITestCase
+
 from core.models import Event
 from users.models import CustomUser
-from rest_framework.test import APITestCase
-from rest_framework import status
-from django.contrib.auth.hashers import make_password
 
 
 class POSTTestSuite(APITestCase):

@@ -1,12 +1,14 @@
-from core.serializers import EventSerializer, NoteSerializer
-from rest_framework import views, status
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from core.models import Event, Note
-from django.shortcuts import get_object_or_404
-from django.http import Http404
 import re
 from abc import ABCMeta, abstractmethod
+
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from rest_framework import status, views
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from core.models import Event, Note
+from core.serializers import EventSerializer, NoteSerializer
 
 QUERY_LIMIT = 5
 

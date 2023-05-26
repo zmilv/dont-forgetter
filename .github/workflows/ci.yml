@@ -16,7 +16,7 @@ jobs:
       matrix:
         python-version: [ 3.9, 3.11]
         database-name:
-          - dont-forgetter-actions
+          - github_actions
         database-password:
           - postgres
         database-user:

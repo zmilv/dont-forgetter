@@ -41,7 +41,7 @@ jobs:
         isort .
         isort --check --diff .
 
-  build image and run tests:
+  build-image-and-run-tests:
     runs-on: ubuntu-latest
     steps:
     - name: Build image

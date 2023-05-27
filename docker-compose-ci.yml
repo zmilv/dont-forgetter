@@ -73,7 +73,8 @@ services:
     command: >
       sh -c "python manage.py makemigrations core &&
              python manage.py makemigrations users &&
-             python manage.py migrate"
+             python manage.py migrate &&
+             pytest"
     volumes:
       - .:/usr/src/app
       - logs:/usr/src/app/logs
@@ -85,16 +86,16 @@ services:
       - redis
       - pgdb
 
-  test:
-    build: .
-    working_dir: /usr/src/app/backend
-    command: pytest
-    depends_on:
-      - django
-      - pgdb
-      - redis
-    env_file:
-      - env_vars/.env.docker
+#  test:
+#    build: .
+#    working_dir: /usr/src/app/backend
+#    command: pytest
+#    depends_on:
+#      - django
+#      - pgdb
+#      - redis
+#    env_file:
+#      - env_vars/.env.docker
 
   pgdb:
     image: postgres:15.2-alpine

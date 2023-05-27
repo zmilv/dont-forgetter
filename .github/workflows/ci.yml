@@ -8,10 +8,8 @@ on:
 
 jobs:
 
-  build:
-
+  format and lint:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.11
@@ -42,6 +40,10 @@ jobs:
         # stop the build if there are Python syntax errors or undefined names
         isort .
         isort --check --diff .
+
+  build image and run tests:
+    runs-on: ubuntu-latest
+    steps:
     - name: Build image
       run: |
         docker-compose -f docker-compose-ci.yml build

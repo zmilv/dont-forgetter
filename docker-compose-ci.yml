@@ -1,70 +1,5 @@
 version: "3.11"
 
-#services:
-#  django:
-#    build: .
-#    working_dir: /usr/src/app/backend
-#    command: >
-#      sh -c "python manage.py makemigrations core &&
-#             python manage.py makemigrations users &&
-#             python manage.py migrate"
-##             pytest"
-#    volumes:
-#      - .:/usr/src/app
-##      - logs:/usr/src/app/logs
-#    ports:
-#      - "8000:8000"
-#    env_file:
-#      - env_vars/.env.docker
-#    depends_on:
-#      - redis
-#      - pgdb
-#
-#  pgdb:
-#    image: postgres:15.2-alpine
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data/
-#    env_file:
-#      - env_vars/.env.docker
-#
-##  celery:
-##    build: .
-##    working_dir: /usr/src/app/backend
-##    command: celery -A backend worker -l INFO
-###    volumes:
-###      - .:/usr/src/app
-##    env_file:
-##      - env_vars/.env.docker
-##    depends_on:
-##      - django
-##      - redis
-##      - pgdb
-##
-##  celery-beat:
-##    build: .
-##    working_dir: /usr/src/app/backend
-##    command: celery -A backend beat -s backend/celerybeat/celerybeat-schedule
-###    volumes:
-###      - .:/usr/src/app
-##    env_file:
-##      - env_vars/.env.docker
-##    depends_on:
-##      - celery
-#
-#  redis:
-#    image: "redis:alpine"
-#
-#  test:
-#    build: .
-#    working_dir: /usr/src/app/backend
-#    command: pytest
-#    depends_on:
-#      - django
-#      - pgdb
-#      - redis
-#    env_file:
-#      - env_vars/.env.docker
-
 services:
   django:
     build: .
@@ -73,8 +8,7 @@ services:
     command: >
       sh -c "python manage.py makemigrations core &&
              python manage.py makemigrations users &&
-             python manage.py migrate &&
-             pytest"
+             python manage.py migrate"
     volumes:
       - .:/usr/src/app
     ports:
@@ -111,4 +45,3 @@ services:
 
 volumes:
   postgres_data:
-

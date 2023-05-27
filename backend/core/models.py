@@ -4,9 +4,13 @@ from datetime import datetime, timedelta, timezone
 from django.conf import settings
 from django.db import models
 
-from core.validators import (date_validator, interval_and_notice_validator,
-                             time_validator, units_translation_dict,
-                             utc_offset_validator)
+from core.validators import (
+    date_validator,
+    interval_and_notice_validator,
+    time_validator,
+    units_translation_dict,
+    utc_offset_validator,
+)
 from users.models import UserSettings
 
 

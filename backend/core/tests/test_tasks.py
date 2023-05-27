@@ -8,8 +8,7 @@ from freezegun import freeze_time
 
 from backend.celery import app
 from core.models import Event
-from core.tasks import (get_new_date_and_time, heartbeat,
-                        reschedule_or_delete_event)
+from core.tasks import get_new_date_and_time, heartbeat, reschedule_or_delete_event
 from users.models import CustomUser
 
 

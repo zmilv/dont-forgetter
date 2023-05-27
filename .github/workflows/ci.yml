@@ -44,6 +44,7 @@ jobs:
   build-image-and-run-tests:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: Build image
       run: |
         docker-compose -f docker-compose-ci.yml build

@@ -43,7 +43,6 @@ jobs:
         isort --check --diff .
     - name: Commit changes
       uses: EndBug/add-and-commit@v4
-      needs: build-image-and-run-tests
       with:
         author_name: ${{ github.actor }}
         author_email: ${{ github.actor }}@users.noreply.github.com

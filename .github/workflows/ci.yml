@@ -8,115 +8,59 @@ on:
 
 jobs:
 
-  build:
-
+  lint-and-format:
+    name: Lint and Format
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 2
-      matrix:
-        python-version: [ 3.9, 3.11]
-        database-name:
-          - github_actions
-        database-password:
-          - postgres
-        database-user:
-          - postgres
-        database-host:
-          - 127.0.0.1
-        database-port:
-          - 5432
-
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_DB: ${{ matrix.database-name }}
-          POSTGRES_USER: ${{ matrix.database-user }}
-          POSTGRES_PASSWORD: ${{ matrix.database-password }}
-        ports:
-          - 5432:5432
-        # Set health checks to wait until postgres has started
-        options:
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-
     steps:
-    - uses: actions/checkout@v2.4.0
-    - name: Set up Python ${{ matrix.python-version }}
+    - uses: actions/checkout@v3
+      if: ${{ github.event_name == 'push' }}
+    - uses: actions/checkout@v3
+      if: ${{ github.event_name == 'pull_request' }}
+      with:
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }}
+    - name: Set up Python 3.11
       uses: actions/setup-python@v2.3.1
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+        python-version: 3.11
+    - name: Upgrade pip
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements/dev.txt
-    - name: Format with black
-      working-directory: ./backend
-      run: |
-        # format the files with black
-        black .
     - name: Lint with flake8
       working-directory: ./backend
       run: |
+        pip install flake8
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Sort imports
+    - name: Format with black
       working-directory: ./backend
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        isort .
-        isort --check --diff .
-    - name: Setup test database
-      env:
-        POSTGRES_DB_NAME: ${{ matrix.database-name }}
-        POSTGRES_USER: ${{ matrix.database-user }}
-        POSTGRES_PASSWORD: ${{ matrix.database-password }}
-        POSTGRES_DB_HOST: ${{ matrix.database-host }}
-        POSTGRES_DB_PORT: ${{ matrix.database-port }}
-        POSTGRES_DB: ${{ matrix.database-name }}
+        pip install black
+        black .
+    - name: Sort imports with isort
+      working-directory: ./backend
       run: |
-        export DATABASE_URL=postgres://${{ matrix.database-user }}:${{ matrix.database-password }}@${{ matrix.database-host }}:${{ matrix.database-port }}/${{ matrix.database-name }}
-        export SECRET_KEY=test-secret-key
-        export DEBUG=1
+        pip install isort
+        isort --profile black .
+    - name: Commit changes
+      uses: EndBug/add-and-commit@v9
+      with:
+        default_author: github_actions
+
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build image
+      run: |
+        docker-compose -f docker-compose-ci.yml build
     - name: Run migrations
-      working-directory: ./backend
-      run: |
-        export DATABASE_URL=postgres://${{ matrix.database-user }}:${{ matrix.database-password }}@${{ matrix.database-host }}:${{ matrix.database-port }}/${{ matrix.database-name }}
-        export SECRET_KEY=test-secret-key
-        export DEBUG=1
-        export ALLOWED_HOSTS=localhost
-        export GITHUB_WORKFLOW=True
-        export MODE=workflow
-        python manage.py makemigrations core
-        python manage.py makemigrations users
-        python manage.py migrate
-        python manage.py migrate --run-syncdb
-        python manage.py check
+      run: docker-compose -f docker-compose-ci.yml run django
     - name: Run tests
-      working-directory: ./backend
-      run: |
-          export DJANGO_SETTINGS_MODULE=backend.settings
-          pytest
-      env:
-        DATABASE_URL: postgres://${{ matrix.database-user }}:${{ matrix.database-password }}@${{ matrix.database-host }}:${{ matrix.database-port }}/${{ matrix.database-name }}
-        SECRET_KEY: test-secret-key
-        DEBUG: 1
-        ALLOWED_HOSTS: localhost
-        GITHUB_WORKFLOW: True
-        MODE: workflow
-    - uses: actions/checkout@v2.4.0
-    - name: Build the images and start the containers
-      run: |
-        export GITHUB_WORKFLOW=True
-        export MODE="Test"
-        docker-compose -f docker-compose.yml build
-        docker-compose -f docker-compose.yml up -d
-        # run: docker-compose up -d --build
+      run: docker-compose -f docker-compose-ci.yml run test
     - name: Stop containers
       if: always()
-      run: docker-compose -f "docker-compose.yml" down
+      run: docker-compose -f "docker-compose-ci.yml" down

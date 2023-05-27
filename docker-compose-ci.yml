@@ -1,0 +1,47 @@
+version: "3.11"
+
+services:
+  django:
+    build: .
+    container_name: django
+    working_dir: /usr/src/app/backend
+    command: >
+      sh -c "python manage.py makemigrations core &&
+             python manage.py makemigrations users &&
+             python manage.py migrate"
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - env_vars/.env.docker
+    depends_on:
+      - redis
+      - pgdb
+
+  test:
+    build: .
+    working_dir: /usr/src/app/backend
+    command: pytest
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - django
+      - pgdb
+      - redis
+    env_file:
+      - env_vars/.env.docker
+
+  pgdb:
+    image: postgres:15.2-alpine
+    container_name: pgdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - env_vars/.env.docker
+
+  redis:
+    image: "redis:alpine"
+
+volumes:
+  postgres_data:

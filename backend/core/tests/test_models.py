@@ -4,11 +4,17 @@ from django.contrib.auth.hashers import make_password
 from django.test import TestCase
 from rest_framework.serializers import ValidationError
 
-from core.models import (Event, apply_utc_offset, date_validator,
-                         get_utc_offset, get_utc_timestamp,
-                         interval_and_notice_validator,
-                         parse_notice_time_or_interval, time_validator,
-                         utc_offset_validator)
+from core.models import (
+    Event,
+    apply_utc_offset,
+    date_validator,
+    get_utc_offset,
+    get_utc_timestamp,
+    interval_and_notice_validator,
+    parse_notice_time_or_interval,
+    time_validator,
+    utc_offset_validator,
+)
 from users.models import CustomUser
 
 

@@ -59,8 +59,10 @@ jobs:
     - name: Build image
       run: |
         docker-compose -f docker-compose-ci.yml build
-    - name: Run migrations and tests
+    - name: Run migrations
       run: docker-compose -f docker-compose-ci.yml run django
+    - name: Run tests
+      run: docker-compose -f docker-compose-ci.yml run test
     - name: Stop containers
       if: always()
       run: docker-compose -f "docker-compose-ci.yml" down

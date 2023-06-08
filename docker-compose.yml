@@ -16,7 +16,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - env_vars/.env.docker
+      - env_vars/.env.dev
     depends_on:
       - redis
       - pgdb
@@ -27,7 +27,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - env_vars/.env.docker
+      - env_vars/.env.dev
 
   celery:
     build: .
@@ -36,7 +36,7 @@ services:
     volumes:
       - .:/usr/src/app
     env_file:
-      - env_vars/.env.docker
+      - env_vars/.env.dev
     depends_on:
       - django
       - redis
@@ -49,7 +49,7 @@ services:
     volumes:
       - .:/usr/src/app
     env_file:
-      - env_vars/.env.docker
+      - env_vars/.env.dev
     depends_on:
       - celery
 

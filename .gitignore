@@ -8,3 +8,6 @@ backend/.coverage
 backend/core/migrations
 backend/users/migrations
 backend/backend/celerybeat/celery*
+env_vars/.env.local
+env_vars/.env.dev
+env_vars/.env.prod

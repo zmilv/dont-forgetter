@@ -3,7 +3,8 @@ venv
 .idea
 .env
 backend/db.sqlite3
-backend/logs/*.log
+backend/logs/*.log*
+logs
 backend/.coverage
 backend/core/migrations
 backend/users/migrations

@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 RUN pip install --upgrade pip
 RUN mkdir -p logs
 RUN mkdir -p backend/backend/celerybeat
+RUN mkdir -p backend/static
 COPY requirements ./requirements
 RUN pip install -r requirements/dev.txt
 COPY . .

@@ -38,9 +38,9 @@ jobs:
         echo DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> env_vars/.env.prod
     - name: Set environment variables
       run: |
-        echo "APP_IMAGE=$(echo ${{env.DJANGO_IMAGE}} )" >> $GITHUB_ENV
+        echo "DJANGO_IMAGE=$(echo ${{env.DJANGO_IMAGE}} )" >> $GITHUB_ENV
         echo "CELERY_IMAGE=$(echo ${{env.CELERY_IMAGE}} )" >> $GITHUB_ENV
-        echo "BEAT_IMAGE=$(echo ${{env.CELERY_BEAT_IMAGE}} )" >> $GITHUB_ENV
+        echo "CELERY_BEAT_IMAGE=$(echo ${{env.CELERY_BEAT_IMAGE}} )" >> $GITHUB_ENV
         echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
     - name: Log in to GitHub Packages
       run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin
@@ -54,7 +54,7 @@ jobs:
         docker pull ${{ env.NGINX_IMAGE }} || true
     - name: Build images
       run: |
-            docker-compose -f docker-compose.cd.yml build
+        docker-compose -f docker-compose.cd.yml build
     - name: Push images
       run: |
         docker push ${{ env.DJANGO_IMAGE }}

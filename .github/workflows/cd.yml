@@ -19,7 +19,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
             - name: Add environment variables to .env.prod
-                run: |
+              run: |
                     echo DEBUG=0 >> env_vars/.env.prod
                     echo PRODUCTION=1 >> env_vars/.env.prod
                     echo SQL_ENGINE=django.db.backends.postgresql >> env_vars/.env.prod
@@ -37,27 +37,27 @@ jobs:
                     echo EMAIL_PORT=${{ secrets.EMAIL_PORT }} >> env_vars/.env.prod
                     echo DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> env_vars/.env.prod
             - name: Set environment variables
-                run: |
+              run: |
                     echo "APP_IMAGE=$(echo ${{env.DJANGO_IMAGE}} )" >> $GITHUB_ENV
                     echo "CELERY_IMAGE=$(echo ${{env.CELERY_IMAGE}} )" >> $GITHUB_ENV
                     echo "BEAT_IMAGE=$(echo ${{env.CELERY_BEAT_IMAGE}} )" >> $GITHUB_ENV
                     echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
 
             - name: Log in to GitHub Packages
-                run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin
+              run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin
             env:
-                PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+              PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
             - name: Pull images
-                run: |
+              run: |
                     docker pull ${{ env.DJANGO_IMAGE }} || true
                     docker pull ${{ env.CELERY_IMAGE }} || true
                     docker pull ${{ env.CELERY_BEAT_IMAGE }} || true
                     docker pull ${{ env.NGINX_IMAGE }} || true
             - name: Build images
-                run: |
+              run: |
                     docker-compose -f docker-compose.cd.yml build
             - name: Push images
-                run: |
+              run: |
                     docker push ${{ env.DJANGO_IMAGE }}
                     docker push ${{ env.CELERY_IMAGE }}
                     docker push ${{ env.CELERY_BEAT_IMAGE }}
@@ -67,53 +67,53 @@ jobs:
         name: Deploy to DigitalOcean
         runs-on: ubuntu-latest
         needs: build
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/master'
         steps:
-            - name: Checkout master
-                uses: actions/checkout@v1
-            - name: Add environment variables to .env
-                run: |
-                    echo DEBUG=0 >> .env
-                    echo PRODUCTION=1 >> .env
-                    echo SQL_ENGINE=django.db.backends.postgresql_psycopg2 >> .env
-                    echo DATABASE=postgres >> .env
-                    echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
-                    echo SQL_DATABASE=${{ secrets.SQL_DATABASE }} >> .env
-                    echo SQL_USER=${{ secrets.SQL_USER }} >> .env
-                    echo SQL_PASSWORD=${{ secrets.SQL_PASSWORD }} >> .env
-                    echo SQL_HOST=${{ secrets.SQL_HOST }} >> .env
-                    echo SQL_PORT=${{ secrets.SQL_PORT }} >> .env
-                    echo DONOT_REPLY_EMAIL=${{ secrets.DONOT_REPLY_EMAIL }} >> .env
-                    echo GOOGLE_APP_PASSWORD=${{ secrets.GOOGLE_APP_PASSWORD }} >> .env
-                    echo APP_IMAGE=${{ env.APP_IMAGE }} >> .env
-                    echo CELERY_IMAGE=${{ env.CELERY_IMAGE }} >> .env
-                    echo BEAT_IMAGE=${{ env.BEAT_IMAGE }} >> .env
-                    echo FLOWER_IMAGE=${{ env.FLOWER_IMAGE }} >> .env
-                    echo NGINX_IMAGE=${{ env.NGINX_IMAGE }} >> .env
-                    echo NAMESPACE=${{ secrets.NAMESPACE }} >> .env
-                    echo DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> .env
-                    echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> .env
+            - uses: actions/checkout@v3
+            - name: Add environment variables to .env.prod
+              run: |
+                    echo DEBUG=0 >> env_vars/.env.prod
+                    echo PRODUCTION=1 >> env_vars/.env.prod
+                    echo SQL_ENGINE=django.db.backends.postgresql >> env_vars/.env.prod
+                    echo DATABASE=postgres >> env_vars/.env.prod
+                    echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> env_vars/.env.prod
+                    echo SQL_DATABASE=${{ secrets.SQL_DATABASE }} >> env_vars/.env.prod
+                    echo SQL_USER=${{ secrets.SQL_USER }} >> env_vars/.env.prod
+                    echo SQL_PASSWORD=${{ secrets.SQL_PASSWORD }} >> env_vars/.env.prod
+                    echo SQL_HOST=${{ secrets.SQL_HOST }} >> env_vars/.env.prod
+                    echo SQL_PORT=${{ secrets.SQL_PORT }} >> env_vars/.env.prod
+                    echo DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }} >> env_vars/.env.prod
+                    echo EMAIL_HOST=${{ secrets.EMAIL_HOST }} >> env_vars/.env.prod
+                    echo EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }} >> env_vars/.env.prod
+                    echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> env_vars/.env.prod
+                    echo EMAIL_PORT=${{ secrets.EMAIL_PORT }} >> env_vars/.env.prod
+                    echo DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> env_vars/.env.prod
+                    echo DJANGO_IMAGE=${{ env.DJANGO_IMAGE }} >> env_vars/.env.prod
+                    echo CELERY_IMAGE=${{ env.CELERY_IMAGE }} >> env_vars/.env.prod
+                    echo CELERY_BEAT_IMAGE=${{ env.CELERY_BEAT_IMAGE }} >> env_vars/.env.prod
+                    echo NGINX_IMAGE=${{ env.NGINX_IMAGE }} >> env_vars/.env.prod
+                    echo NAMESPACE=${{ secrets.NAMESPACE }} >> env_vars/.env.prod
+                    echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> env_vars/.env.prod
             - name: Add the private SSH key to the ssh-agent
-                env:
+              env:
                     SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-                run: |
+              run: |
                     mkdir -p ~/.ssh
                     ssh-agent -a $SSH_AUTH_SOCK > /dev/null
                     ssh-keyscan github.com >> ~/.ssh/known_hosts
                     ssh-add - <<< "${{ secrets.PRIVATE_KEY }}"
             - name: Build and deploy images on DigitalOcean
-                env:
+              env:
                     SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-                run: |
-                    scp  -o StrictHostKeyChecking=no -r ./.env ./backend ./logs ./nginx ./docker-compose.prod.yml root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/home/bobby/cicd
+              run: |
+                    scp  -o StrictHostKeyChecking=no -r ./.env ./backend ./logs ./nginx ./docker-compose.prod.yml root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/home/zygis/dont-forgetter
                     ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
-                        cd /home/bobby/cicd
-                        source .env
+                        cd /home/zygis/dont-forgetter
+                        source env_vars/.env.prod
                         docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
-                        docker pull $APP_IMAGE
+                        docker pull $DJANGO_IMAGE
                         docker pull $CELERY_IMAGE
-                        docker pull $BEAT_IMAGE
-                        docker pull $FLOWER_IMAGE
+                        docker pull $CELERY_BEAT_IMAGE
                         docker pull $NGINX_IMAGE
                         docker-compose -f docker-compose.prod.yml up -d
                     ENDSSH

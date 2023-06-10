@@ -1,0 +1,64 @@
+name: CD
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+    DJANGO_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/django
+    CELERY_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/celery
+    CELERY_BEAT_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/celery-beat
+    NGINX_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/nginx
+
+jobs:
+    build:
+        name: Build Docker Images
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - name: Add environment variables to .env.prod
+                run: |
+                    echo DEBUG=0 >> env_vars/.env.prod
+                    echo PRODUCTION=1 >> env_vars/.env.prod
+                    echo SQL_ENGINE=django.db.backends.postgresql >> env_vars/.env.prod
+                    echo DATABASE=postgres >> env_vars/.env.prod
+                    echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> env_vars/.env.prod
+                    echo SQL_DATABASE=${{ secrets.SQL_DATABASE }} >> env_vars/.env.prod
+                    echo SQL_USER=${{ secrets.SQL_USER }} >> env_vars/.env.prod
+                    echo SQL_PASSWORD=${{ secrets.SQL_PASSWORD }} >> env_vars/.env.prod
+                    echo SQL_HOST=${{ secrets.SQL_HOST }} >> env_vars/.env.prod
+                    echo SQL_PORT=${{ secrets.SQL_PORT }} >> env_vars/.env.prod
+                    echo DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }} >> env_vars/.env.prod
+                    echo EMAIL_HOST=${{ secrets.EMAIL_HOST }} >> env_vars/.env.prod
+                    echo EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }} >> env_vars/.env.prod
+                    echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> env_vars/.env.prod
+                    echo EMAIL_PORT=${{ secrets.EMAIL_PORT }} >> env_vars/.env.prod
+                    echo DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> env_vars/.env.prod
+            - name: Set environment variables
+                run: |
+                    echo "APP_IMAGE=$(echo ${{env.DJANGO_IMAGE}} )" >> $GITHUB_ENV
+                    echo "CELERY_IMAGE=$(echo ${{env.CELERY_IMAGE}} )" >> $GITHUB_ENV
+                    echo "BEAT_IMAGE=$(echo ${{env.CELERY_BEAT_IMAGE}} )" >> $GITHUB_ENV
+                    echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
+
+            - name: Log in to GitHub Packages
+                run: echo ${PERSONAL_ACCESS_TOKEN} | docker login ghcr.io -u ${{ secrets.NAMESPACE }} --password-stdin
+            env:
+                PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+            - name: Pull images
+                run: |
+                    docker pull ${{ env.DJANGO_IMAGE }} || true
+                    docker pull ${{ env.CELERY_IMAGE }} || true
+                    docker pull ${{ env.CELERY_BEAT_IMAGE }} || true
+                    docker pull ${{ env.NGINX_IMAGE }} || true
+            - name: Build images
+                run: |
+                    docker-compose -f docker-compose.cd.yml build
+            - name: Push images
+                run: |
+                    docker push ${{ env.DJANGO_IMAGE }}
+                    docker push ${{ env.CELERY_IMAGE }}
+                    docker push ${{ env.CELERY_BEAT_IMAGE }}
+                    docker push ${{ env.NGINX_IMAGE }}

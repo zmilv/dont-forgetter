@@ -14,7 +14,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - env_vars/.env.docker
+      - env_vars/.env.dev.template
     depends_on:
       - redis
       - pgdb
@@ -30,7 +30,7 @@ services:
       - pgdb
       - redis
     env_file:
-      - env_vars/.env.docker
+      - env_vars/.env.dev.template
 
   pgdb:
     image: postgres:15.2-alpine
@@ -38,7 +38,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - env_vars/.env.docker
+      - env_vars/.env.dev.template
 
   redis:
     image: "redis:alpine"

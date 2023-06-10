@@ -2,6 +2,8 @@ version: "3.8"
 
 services:
   django:
+    image: "${DJANGO_IMAGE}"
+    restart: always
     build: .
     container_name: django
     working_dir: /usr/src/app/backend
@@ -24,6 +26,8 @@ services:
       - pgdb
 
   nginx:
+    image: "${NGINX_IMAGE}"
+    restart: always
     build: ./nginx
     volumes:
       - static:/static
@@ -41,6 +45,8 @@ services:
       - env_vars/.env.prod
 
   celery:
+    image: "${CELERY_IMAGE}"
+    restart: always
     build: .
     working_dir: /usr/src/app/backend
     command: celery -A backend worker -l INFO
@@ -54,6 +60,8 @@ services:
       - pgdb
 
   celery-beat:
+    image: "${CELERY_BEAT_IMAGE}"
+    restart: always
     build: .
     working_dir: /usr/src/app/backend
     command: celery -A backend beat -s backend/celerybeat/celerybeat-schedule

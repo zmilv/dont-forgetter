@@ -105,7 +105,7 @@ jobs:
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
-        scp  -o StrictHostKeyChecking=no -r ./.env ./backend ./logs ./nginx ./docker-compose.prod.yml root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/home/zygis/dont-forgetter
+        scp -o StrictHostKeyChecking=no -r ./env_vars/.env.prod ./backend ./backend/logs ./nginx ./docker-compose.prod.yml root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/home/zygis/dont-forgetter
         ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
             cd /home/zygis/dont-forgetter
             source env_vars/.env.prod

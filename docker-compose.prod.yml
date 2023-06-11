@@ -2,6 +2,8 @@ version: "3.8"
 
 services:
   django:
+    image: "${DJANGO_IMAGE}"
+    restart: always
     build: .
     container_name: django
     working_dir: /usr/src/app/backend
@@ -9,17 +11,30 @@ services:
       sh -c "python manage.py makemigrations core &&
              python manage.py makemigrations users &&
              python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+             python manage.py collectstatic --noinput &&
+             gunicorn backend.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/usr/src/app
       - logs:/usr/src/app/logs
-    ports:
-      - "8000:8000"
+      - static:/static
+    expose:
+      - 8000
     env_file:
-      - env_vars/.env.dev
+      - env_vars/.env.prod
     depends_on:
       - redis
       - pgdb
+
+  nginx:
+    image: "${NGINX_IMAGE}"
+    restart: always
+    build: ./nginx
+    volumes:
+      - static:/static
+    ports:
+      - "8080:8080"
+    depends_on:
+      - django
 
   pgdb:
     image: postgres:15.2-alpine
@@ -27,29 +42,33 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
-      - env_vars/.env.dev
+      - env_vars/.env.prod
 
   celery:
+    image: "${CELERY_IMAGE}"
+    restart: always
     build: .
     working_dir: /usr/src/app/backend
     command: celery -A backend worker -l INFO
     volumes:
       - .:/usr/src/app
     env_file:
-      - env_vars/.env.dev
+      - env_vars/.env.prod
     depends_on:
       - django
       - redis
       - pgdb
 
   celery-beat:
+    image: "${CELERY_BEAT_IMAGE}"
+    restart: always
     build: .
     working_dir: /usr/src/app/backend
     command: celery -A backend beat -s backend/celerybeat/celerybeat-schedule
     volumes:
       - .:/usr/src/app
     env_file:
-      - env_vars/.env.dev
+      - env_vars/.env.prod
     depends_on:
       - celery
 
@@ -59,3 +78,4 @@ services:
 volumes:
   logs: {}
   postgres_data:
+  static:

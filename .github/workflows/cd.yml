@@ -28,6 +28,7 @@ jobs:
         echo SQL_DATABASE=${{ secrets.SQL_DATABASE }} >> env_vars/.env.prod
         echo SQL_USER=${{ secrets.SQL_USER }} >> env_vars/.env.prod
         echo SQL_PASSWORD=${{ secrets.SQL_PASSWORD }} >> env_vars/.env.prod
+        echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> env_vars/.env.prod
         echo SQL_HOST=${{ secrets.SQL_HOST }} >> env_vars/.env.prod
         echo SQL_PORT=${{ secrets.SQL_PORT }} >> env_vars/.env.prod
         echo DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }} >> env_vars/.env.prod
@@ -79,6 +80,7 @@ jobs:
         echo SQL_DATABASE=${{ secrets.SQL_DATABASE }} >> env_vars/.env.prod
         echo SQL_USER=${{ secrets.SQL_USER }} >> env_vars/.env.prod
         echo SQL_PASSWORD=${{ secrets.SQL_PASSWORD }} >> env_vars/.env.prod
+        echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> env_vars/.env.prod
         echo SQL_HOST=${{ secrets.SQL_HOST }} >> env_vars/.env.prod
         echo SQL_PORT=${{ secrets.SQL_PORT }} >> env_vars/.env.prod
         echo DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }} >> env_vars/.env.prod

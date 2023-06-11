@@ -109,6 +109,10 @@ jobs:
         ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
             cd /home/zygis/dont-forgetter
             source env_vars/.env.prod
+            export DJANGO_IMAGE=$DJANGO_IMAGE
+            export CELERY_IMAGE=$CELERY_IMAGE
+            export CELERY_BEAT_IMAGE=$CELERY_BEAT_IMAGE
+            export NGINX_IMAGE=$NGINX_IMAGE
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
             docker pull $DJANGO_IMAGE
             docker pull $CELERY_IMAGE

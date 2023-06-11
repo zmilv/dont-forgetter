@@ -1,6 +1,9 @@
 [![CI](https://github.com/zmilv/dont-forgetter/actions/workflows/ci.yml/badge.svg)](https://github.com/zmilv/dont-forgetter/actions/workflows/ci.yml)
+[![CD](https://github.com/zmilv/dont-forgetter/actions/workflows/cd.yml/badge.svg)](https://github.com/zmilv/dont-forgetter/actions/workflows/cd.yml)
 
 # dont-forgetter (WIP)
+
+Live link: https://dont-forgetter.rest
 
 The application provides a RESTful API that allows users to create notes and set reminders for specific dates and times. Users can choose the type of notification they prefer, such as email, ~~SMS, Discord message, or push notification~~ (coming soon) and the application will send the notification at the scheduled time. 
 
@@ -75,4 +78,3 @@ This application can be useful for a variety of scenarios, such as personal to-d
 ### Future plans
 - React Native front-end
 - More notification types
-- Deploy

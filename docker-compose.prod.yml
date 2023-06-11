@@ -17,8 +17,8 @@ services:
       - .:/usr/src/app
       - logs:/usr/src/app/logs
       - static:/static
-    ports:
-      - "8000:8000"
+    expose:
+      - 8000
     env_file:
       - env_vars/.env.prod
     depends_on:

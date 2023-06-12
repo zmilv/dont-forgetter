@@ -7,7 +7,6 @@ on:
     branches: [ "develop", "master" ]
 
 jobs:
-
   lint-and-format:
     name: Lint and Format
     runs-on: ubuntu-latest
@@ -54,13 +53,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Copy env vars
+      working-directory: ./env_vars
+      run: cp .env.dev.template .env.dev
     - name: Build image
       run: |
-        docker-compose -f docker-compose.ci.yml build
+        docker-compose -f docker-compose.yml --profile ci build
     - name: Run migrations
-      run: docker-compose -f docker-compose.ci.yml run django
+      run: docker-compose -f docker-compose.yml run django-migrations
     - name: Run tests
-      run: docker-compose -f docker-compose.ci.yml run test
+      run: docker-compose -f docker-compose.yml run test
     - name: Stop containers
       if: always()
-      run: docker-compose -f "docker-compose.ci.yml" down
+      run: docker-compose -f "docker-compose.yml" down

@@ -60,6 +60,7 @@ jobs:
         docker pull ${{ env.NGINX_IMAGE }} || true
     - name: Build images
       run: |
+        touch env_vars/.env.dev
         docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg "env=prod"
     - name: Push images
       run: |

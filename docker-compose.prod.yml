@@ -1,31 +1,30 @@
 version: "3.8"
 
 services:
-  django:
-    image: "${DJANGO_IMAGE}"
-    restart: always
-    build: .
-    container_name: django
-    working_dir: /usr/src/app/backend
+  django-migrations:
+    image: "${DJANGO_MIGRATIONS_IMAGE}"
     command: >
       sh -c "python manage.py makemigrations core &&
              python manage.py makemigrations users &&
              python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn backend.wsgi:application --bind 0.0.0.0:8000"
+             python manage.py collectstatic --noinput"
     volumes:
-      - .:/usr/src/app
-      - logs:/usr/src/app/logs
       - static:/static
+    env_file:
+      - env_vars/.env.prod
+
+  django:
+    image: "${DJANGO_IMAGE}"
+    restart: always
+    command: >
+      sh -c "gunicorn backend.wsgi:application --bind 0.0.0.0:8000"
     expose:
       - 8000
     env_file:
       - env_vars/.env.prod
-    depends_on:
-      - redis
-      - pgdb
 
   nginx:
+    container_name: nginx
     image: "${NGINX_IMAGE}"
     restart: always
     build: ./nginx
@@ -37,45 +36,20 @@ services:
       - django
 
   pgdb:
-    image: postgres:15.2-alpine
-    container_name: pgdb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
     env_file:
       - env_vars/.env.prod
 
   celery:
     image: "${CELERY_IMAGE}"
     restart: always
-    build: .
-    working_dir: /usr/src/app/backend
-    command: celery -A backend worker -l INFO
-    volumes:
-      - .:/usr/src/app
     env_file:
       - env_vars/.env.prod
-    depends_on:
-      - django
-      - redis
-      - pgdb
 
   celery-beat:
     image: "${CELERY_BEAT_IMAGE}"
     restart: always
-    build: .
-    working_dir: /usr/src/app/backend
-    command: celery -A backend beat -s backend/celerybeat/celerybeat-schedule
-    volumes:
-      - .:/usr/src/app
     env_file:
       - env_vars/.env.prod
-    depends_on:
-      - celery
-
-  redis:
-    image: "redis:alpine"
 
 volumes:
-  logs: {}
-  postgres_data:
   static:

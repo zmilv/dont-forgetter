@@ -8,6 +8,7 @@ on:
 
 env:
   DJANGO_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/django
+  DJANGO_MIGRATIONS_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/django-migrations
   CELERY_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/celery
   CELERY_BEAT_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/celery-beat
   NGINX_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/nginx
@@ -22,6 +23,8 @@ jobs:
       run: |
         echo DEBUG=0 >> env_vars/.env.prod
         echo PRODUCTION=1 >> env_vars/.env.prod
+        echo CELERY_BROKER=redis://redis:6379/0 >> env_vars/.env.prod
+        echo CELERY_BACKEND=redis://redis:6379/0 >> env_vars/.env.prod
         echo SQL_ENGINE=django.db.backends.postgresql >> env_vars/.env.prod
         echo DATABASE=postgres >> env_vars/.env.prod
         echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> env_vars/.env.prod
@@ -40,6 +43,7 @@ jobs:
     - name: Set environment variables
       run: |
         echo "DJANGO_IMAGE=$(echo ${{env.DJANGO_IMAGE}} )" >> $GITHUB_ENV
+        echo "DJANGO_MIGRATIONS_IMAGE=$(echo ${{env.DJANGO_MIGRATIONS_IMAGE}} )" >> $GITHUB_ENV
         echo "CELERY_IMAGE=$(echo ${{env.CELERY_IMAGE}} )" >> $GITHUB_ENV
         echo "CELERY_BEAT_IMAGE=$(echo ${{env.CELERY_BEAT_IMAGE}} )" >> $GITHUB_ENV
         echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
@@ -50,15 +54,18 @@ jobs:
     - name: Pull images
       run: |
         docker pull ${{ env.DJANGO_IMAGE }} || true
+        docker pull ${{ env.DJANGO_MIGRATIONS_IMAGE }} || true
         docker pull ${{ env.CELERY_IMAGE }} || true
         docker pull ${{ env.CELERY_BEAT_IMAGE }} || true
         docker pull ${{ env.NGINX_IMAGE }} || true
     - name: Build images
       run: |
-        docker-compose -f docker-compose.cd.yml build
+        touch env_vars/.env.dev
+        docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg "env=prod"
     - name: Push images
       run: |
         docker push ${{ env.DJANGO_IMAGE }}
+        docker push ${{ env.DJANGO_MIGRATIONS_IMAGE }}
         docker push ${{ env.CELERY_IMAGE }}
         docker push ${{ env.CELERY_BEAT_IMAGE }}
         docker push ${{ env.NGINX_IMAGE }}
@@ -74,6 +81,8 @@ jobs:
       run: |
         echo DEBUG=0 >> env_vars/.env.prod
         echo PRODUCTION=1 >> env_vars/.env.prod
+        echo CELERY_BROKER=redis://redis:6379/0 >> env_vars/.env.prod
+        echo CELERY_BACKEND=redis://redis:6379/0 >> env_vars/.env.prod
         echo SQL_ENGINE=django.db.backends.postgresql >> env_vars/.env.prod
         echo DATABASE=postgres >> env_vars/.env.prod
         echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> env_vars/.env.prod
@@ -90,6 +99,7 @@ jobs:
         echo EMAIL_PORT=${{ secrets.EMAIL_PORT }} >> env_vars/.env.prod
         echo DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> env_vars/.env.prod
         echo DJANGO_IMAGE=${{ env.DJANGO_IMAGE }} >> env_vars/.env.prod
+        echo DJANGO_MIGRATIONS_IMAGE=${{ env.DJANGO_MIGRATIONS_IMAGE }} >> env_vars/.env.prod
         echo CELERY_IMAGE=${{ env.CELERY_IMAGE }} >> env_vars/.env.prod
         echo CELERY_BEAT_IMAGE=${{ env.CELERY_BEAT_IMAGE }} >> env_vars/.env.prod
         echo NGINX_IMAGE=${{ env.NGINX_IMAGE }} >> env_vars/.env.prod
@@ -107,18 +117,21 @@ jobs:
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
-        scp -o StrictHostKeyChecking=no -r ./env_vars ./backend ./backend/logs ./nginx ./docker-compose.prod.yml root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/home/zygis/dont-forgetter
+        scp -o StrictHostKeyChecking=no -r ./env_vars ./backend ./backend/logs ./nginx ./docker-compose.yml ./docker-compose.prod.yml root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/home/zygis/dont-forgetter
         ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
             cd /home/zygis/dont-forgetter
+            touch env_vars/.env.dev
             source env_vars/.env.prod
             export DJANGO_IMAGE=$DJANGO_IMAGE
+            export DJANGO_MIGRATIONS_IMAGE=$DJANGO_MIGRATIONS_IMAGE
             export CELERY_IMAGE=$CELERY_IMAGE
             export CELERY_BEAT_IMAGE=$CELERY_BEAT_IMAGE
             export NGINX_IMAGE=$NGINX_IMAGE
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
             docker pull $DJANGO_IMAGE
+            docker pull $DJANGO_MIGRATIONS_IMAGE
             docker pull $CELERY_IMAGE
             docker pull $CELERY_BEAT_IMAGE
             docker pull $NGINX_IMAGE
-            docker-compose -f docker-compose.prod.yml up -d
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
         ENDSSH

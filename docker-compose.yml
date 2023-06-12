@@ -31,6 +31,7 @@ services:
 
   celery:
     build: .
+    container_name: celery
     working_dir: /usr/src/app/backend
     command: celery -A backend worker -l INFO
     volumes:
@@ -44,6 +45,7 @@ services:
 
   celery-beat:
     build: .
+    container_name: celery-beat
     working_dir: /usr/src/app/backend
     command: celery -A backend beat -s backend/celerybeat/celerybeat-schedule
     volumes:
@@ -55,6 +57,23 @@ services:
 
   redis:
     image: "redis:alpine"
+    container_name: redis
+
+  test:
+    profiles:
+      - ci
+    build: .
+    container_name: test
+    working_dir: /usr/src/app/backend
+    command: pytest
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - django
+      - pgdb
+      - redis
+    env_file:
+      - env_vars/.env.dev
 
 volumes:
   logs: {}

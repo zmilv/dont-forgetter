@@ -8,6 +8,7 @@ on:
 
 env:
   DJANGO_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/django
+  DJANGO_MIGRATIONS_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/django-migrations
   CELERY_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/celery
   CELERY_BEAT_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/celery-beat
   NGINX_IMAGE: ghcr.io/$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')/nginx
@@ -42,6 +43,7 @@ jobs:
     - name: Set environment variables
       run: |
         echo "DJANGO_IMAGE=$(echo ${{env.DJANGO_IMAGE}} )" >> $GITHUB_ENV
+        echo "DJANGO_MIGRATIONS_IMAGE=$(echo ${{env.DJANGO_MIGRATIONS_IMAGE}} )" >> $GITHUB_ENV
         echo "CELERY_IMAGE=$(echo ${{env.CELERY_IMAGE}} )" >> $GITHUB_ENV
         echo "CELERY_BEAT_IMAGE=$(echo ${{env.CELERY_BEAT_IMAGE}} )" >> $GITHUB_ENV
         echo "NGINX_IMAGE=$(echo ${{env.NGINX_IMAGE}} )" >> $GITHUB_ENV
@@ -52,6 +54,7 @@ jobs:
     - name: Pull images
       run: |
         docker pull ${{ env.DJANGO_IMAGE }} || true
+        docker pull ${{ env.DJANGO_MIGRATIONS_IMAGE }} || true
         docker pull ${{ env.CELERY_IMAGE }} || true
         docker pull ${{ env.CELERY_BEAT_IMAGE }} || true
         docker pull ${{ env.NGINX_IMAGE }} || true
@@ -61,6 +64,7 @@ jobs:
     - name: Push images
       run: |
         docker push ${{ env.DJANGO_IMAGE }}
+        docker push ${{ env.DJANGO_MIGRATIONS_IMAGE }}
         docker push ${{ env.CELERY_IMAGE }}
         docker push ${{ env.CELERY_BEAT_IMAGE }}
         docker push ${{ env.NGINX_IMAGE }}
@@ -94,6 +98,7 @@ jobs:
         echo EMAIL_PORT=${{ secrets.EMAIL_PORT }} >> env_vars/.env.prod
         echo DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> env_vars/.env.prod
         echo DJANGO_IMAGE=${{ env.DJANGO_IMAGE }} >> env_vars/.env.prod
+        echo DJANGO_MIGRATIONS_IMAGE=${{ env.DJANGO_MIGRATIONS_IMAGE }} >> env_vars/.env.prod
         echo CELERY_IMAGE=${{ env.CELERY_IMAGE }} >> env_vars/.env.prod
         echo CELERY_BEAT_IMAGE=${{ env.CELERY_BEAT_IMAGE }} >> env_vars/.env.prod
         echo NGINX_IMAGE=${{ env.NGINX_IMAGE }} >> env_vars/.env.prod
@@ -116,11 +121,13 @@ jobs:
             cd /home/zygis/dont-forgetter
             source env_vars/.env.prod
             export DJANGO_IMAGE=$DJANGO_IMAGE
+            export DJANGO_MIGRATIONS_IMAGE=$DJANGO_MIGRATIONS_IMAGE
             export CELERY_IMAGE=$CELERY_IMAGE
             export CELERY_BEAT_IMAGE=$CELERY_BEAT_IMAGE
             export NGINX_IMAGE=$NGINX_IMAGE
             docker login ghcr.io -u $NAMESPACE -p $PERSONAL_ACCESS_TOKEN
             docker pull $DJANGO_IMAGE
+            docker pull $DJANGO_MIGRATIONS_IMAGE
             docker pull $CELERY_IMAGE
             docker pull $CELERY_BEAT_IMAGE
             docker pull $NGINX_IMAGE

@@ -60,7 +60,7 @@ jobs:
       run: |
         docker-compose -f docker-compose.yml --profile ci build
     - name: Run migrations
-      run: sudo docker-compose -f docker-compose.yml run django -d
+      run: docker-compose -f docker-compose.yml run -d django
     - name: Run tests
       run: docker-compose -f docker-compose.yml run test
     - name: Stop containers

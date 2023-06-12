@@ -120,6 +120,7 @@ jobs:
         scp -o StrictHostKeyChecking=no -r ./env_vars ./backend ./backend/logs ./nginx ./docker-compose.yml ./docker-compose.prod.yml root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }}:/home/zygis/dont-forgetter
         ssh -o StrictHostKeyChecking=no root@${{ secrets.DIGITAL_OCEAN_IP_ADDRESS }} << 'ENDSSH'
             cd /home/zygis/dont-forgetter
+            touch env_vars/.env.dev
             source env_vars/.env.prod
             export DJANGO_IMAGE=$DJANGO_IMAGE
             export DJANGO_MIGRATIONS_IMAGE=$DJANGO_MIGRATIONS_IMAGE

@@ -15,7 +15,7 @@ class POSTTestSuite(APITestCase):
         )
         self.client.force_authenticate(self.user)
         self.data = {
-            "type": "uni",
+            "category": "uni",
             "title": "assignment",
             "date": "2024-01-01",
             "time": "23:59",
@@ -23,6 +23,7 @@ class POSTTestSuite(APITestCase):
             "interval": "10min",
             "notice_time": "10min",
             "info": "description",
+            "notification_type": "email"
         }
         self.url = "/event/"
 
@@ -61,12 +62,13 @@ class GETTestSuite(APITestCase):
             )
         self.id1_dict = dict(
             [
-                ("type", "other"),
+                ("category", "other"),
                 ("title", "Title-1"),
                 ("date", "2024-01-01"),
                 ("time", "10:00"),
                 ("utc_offset", "+0"),
                 ("interval", "-"),
+                ("notification_type", "email"),
                 ("utc_timestamp", 1704103200),
                 ("notice_time", "-"),
                 ("info", None),
@@ -74,12 +76,13 @@ class GETTestSuite(APITestCase):
         )
         self.id2_dict = dict(
             [
-                ("type", "other"),
+                ("category", "other"),
                 ("title", "Title-2"),
                 ("date", "2024-01-02"),
                 ("time", "10:00"),
                 ("utc_offset", "+0"),
                 ("interval", "-"),
+                ("notification_type", "email"),
                 ("utc_timestamp", 1704189600),
                 ("notice_time", "-"),
                 ("info", None),

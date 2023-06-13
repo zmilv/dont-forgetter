@@ -5,9 +5,9 @@
 
 Live link: https://dont-forgetter.rest
 
-The application provides a RESTful API that allows users to create notes and set reminders for specific dates and times. Users can choose the type of notification they prefer, such as email, ~~SMS, Discord message, or push notification~~ (coming soon) and the application will send the notification at the scheduled time. 
+The application provides a RESTful API that allows users to create notes and set reminders for specific dates and times. Users can choose the type of notification they prefer, such as email, ~~SMS or Discord message~~ (coming soon) and the application will send the notification at the scheduled time. 
 
-In addition, the API supports CRUD operations for notes, allowing users to create, retrieve, update, and delete notes as needed. The API also provides an endpoint to view upcoming reminders, as well as the ability to edit or delete them. The reminders and notes can be organized into types for easier management. Authentication is supported to ensure secure access to the user's data.
+In addition, the API supports CRUD operations for notes, allowing users to create, retrieve, update, and delete notes as needed. The API also provides an endpoint to view upcoming reminders, as well as the ability to edit or delete them. The reminders and notes can be organized into categories for easier management. Authentication is supported to ensure secure access to the user's data.
 
 This application can be useful for a variety of scenarios, such as personal to-do lists, project management, and team collaboration. With its flexible API, developers can easily integrate it into other applications or services. 
 
@@ -43,7 +43,7 @@ This application can be useful for a variety of scenarios, such as personal to-d
 | Field       | Type                | Examples            |
 |-------------|---------------------|---------------------|
 | id          | integer (automatic) |                     |
-| type        | string              | "birthday", "uni"   |
+| category    | string              | "birthday", "uni"   |
 | title       | string (required)   |                     |
 | date        | string (required)   | "2023-05-15"        |
 | time        | string              | "14:00"             |
@@ -56,21 +56,21 @@ This application can be useful for a variety of scenarios, such as personal to-d
 | Field      | Type                | Examples           |
 |------------|---------------------|--------------------|
 | id         | integer (automatic) |                    |
-| type       | string              |                    |
+| category   | string              |                    |
 | title      | string (required)   |                    |
 | info       | string (required)   |                    |
 | created_at | string (automatic)  | "2023-05-15 14:00" |
 | updated_at | string (automatic)  | "2023-05-15 14:00" |
 
 ### Queries
-| Operator     | Examples                                            |
-|--------------|-----------------------------------------------------|
-| equal        | equal(type,"birthday")                              |
-| and          | and(equal(type,"uni"),less_than(date,"2023-05-16")) |
-| or           | or(equal(type,"uni"),equal(type,"work"))            |
-| not          | not(equal(type,"uni"))                              |
-| greater_than | greater_than(date,"2023-06-01")                     |
-| less_than    | less_than(time,"17:00")                             |
+| Operator     | Examples                                                |
+|--------------|---------------------------------------------------------|
+| equal        | equal(category,"birthday")                              |
+| and          | and(equal(category,"uni"),less_than(date,"2023-05-16")) |
+| or           | or(equal(category,"uni"),equal(category,"work"))        |
+| not          | not(equal(category,"uni"))                              |
+| greater_than | greater_than(date,"2023-06-01")                         |
+| less_than    | less_than(time,"17:00")                                 |
 
 ### Current architecture
 ![df-current-architecture_k30lF0D](https://github.com/zmilv/dont-forgetter/assets/27917439/87dcd5c5-b97d-48a0-844c-c1bff60c89d4)

@@ -64,7 +64,7 @@ class Event(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    type = models.CharField(max_length=70, default="other")
+    category = models.CharField(max_length=70, default="other")
     title = models.CharField(max_length=100)
     date = models.CharField(max_length=10, validators=[date_validator])
     time = models.CharField(max_length=5, default="", validators=[time_validator])
@@ -97,7 +97,7 @@ class Event(models.Model):
         super(Event, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"ID{self.pk}({self.user.pk})|{self.type} - {self.title}"
+        return f"ID{self.pk}({self.user.pk})|{self.category} - {self.title}"
 
 
 class Note(models.Model):
@@ -106,7 +106,7 @@ class Note(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    type = models.CharField(max_length=70, default="other")
+    category = models.CharField(max_length=70, default="other")
     title = models.CharField(max_length=100, null=True, blank=True)
     info = models.TextField(max_length=3000)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -122,4 +122,4 @@ class Note(models.Model):
         super(Note, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"ID{self.pk}({self.user.pk})|{self.type} - {self.title}"
+        return f"ID{self.pk}({self.user.pk})|{self.category} - {self.title}"

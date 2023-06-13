@@ -40,3 +40,10 @@ def utc_offset_validator(value):
         raise serializers.ValidationError(
             "Invalid UTC offset format. Valid examples: +1, -2:30"
         )
+
+
+def notification_type_validator(value):
+    if value not in ("email", "sms"):
+        raise serializers.ValidationError(
+            'Invalid notification type. Currently available choices: email, sms'
+        )

@@ -10,6 +10,7 @@ from core.validators import (
     time_validator,
     units_translation_dict,
     utc_offset_validator,
+    notification_type_validator
 )
 from users.models import UserSettings
 
@@ -77,6 +78,9 @@ class Event(models.Model):
     utc_offset = models.CharField(
         max_length=6, default="", validators=[utc_offset_validator]
     )
+    notification_type = models.CharField(
+        max_length=10, default="", validators=[notification_type_validator]
+    )
     utc_timestamp = models.IntegerField(editable=False)
 
     def save(self, *args, **kwargs):
@@ -85,6 +89,8 @@ class Event(models.Model):
             self.time = user_settings.default_time
         if not self.utc_offset:
             self.utc_offset = user_settings.default_utc_offset
+        if not self.notification_type:
+            self.notification_type = user_settings.default_notification_type
         self.utc_timestamp = get_utc_timestamp(
             str(self.date), str(self.time), str(self.utc_offset), str(self.notice_time)
         )

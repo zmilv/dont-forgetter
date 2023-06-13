@@ -100,12 +100,12 @@ class TestCeleryIntegration(SimpleTestCase):
 
     def test_heartbeat_without_interval(self):
         Event.objects.create(
-            title=f"Title-1", date="2020-01-01", time="10:00", user=self.user
+            title=f"Title-1", date="2020-01-01", time="10:00", notification_type="email", user=self.user
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should be deleted
         result = heartbeat_task.get()
-        reschedule_or_delete_id, send_notification_id = result[0], result[1]
+        reschedule_or_delete_id, send_notification_id = result[0][0], result[0][1]
         send_notification_task = AsyncResult(send_notification_id, app=app)
         reschedule_or_delete_task = AsyncResult(reschedule_or_delete_id, app=app)
         send_notification_task.get()
@@ -121,12 +121,13 @@ class TestCeleryIntegration(SimpleTestCase):
             date="2020-01-01",
             time="10:00",
             interval="30min",
+            notification_type="email",
             user=self.user,
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should be updated
         result = heartbeat_task.get()
-        reschedule_or_delete_id, send_notification_id = result[0], result[1]
+        reschedule_or_delete_id, send_notification_id = result[0][0], result[0][1]
         send_notification_task = AsyncResult(send_notification_id, app=app)
         reschedule_or_delete_task = AsyncResult(reschedule_or_delete_id, app=app)
         send_notification_task.get()
@@ -144,12 +145,13 @@ class TestCeleryIntegration(SimpleTestCase):
             date="2019-01-01",
             time="10:00",
             interval="30min",
+            notification_type="email",
             user=self.user,
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should be updated
         result = heartbeat_task.get()
-        reschedule_or_delete_id, send_notification_id = result[0], result[1]
+        reschedule_or_delete_id, send_notification_id = result[0][0], result[0][1]
         send_notification_task = AsyncResult(send_notification_id, app=app)
         reschedule_or_delete_task = AsyncResult(reschedule_or_delete_id, app=app)
         send_notification_task.get()
@@ -163,7 +165,7 @@ class TestCeleryIntegration(SimpleTestCase):
 
     def test_heartbeat_without_expired_events(self):
         Event.objects.create(
-            title=f"Title-1", date="2020-01-01", time="11:00", user=self.user
+            title=f"Title-1", date="2020-01-01", time="11:00", notification_type="email", user=self.user
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should remain unchanged

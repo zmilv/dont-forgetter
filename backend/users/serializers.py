@@ -14,7 +14,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "email")
 
 
-class UserRegisterationSerializer(serializers.ModelSerializer):
+class UserRegistrationSerializer(serializers.ModelSerializer):
     """
     Serializer class to serialize registration requests and create a new user.
     """

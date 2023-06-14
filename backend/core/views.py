@@ -6,9 +6,12 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from core.models import Event, Note
 from core.serializers import EventSerializer, NoteSerializer
+from core.validators import regex_dict
 
 QUERY_LIMIT = 5
 
@@ -103,6 +106,18 @@ class APIQueryFuncs:
 
 
 ownership_error_message = "You are not the owner of this object"
+
+
+def apply_swagger_schema(swagger_kwargs):
+    def decorator(cls):
+        class DecoratedClass(cls):
+            @swagger_auto_schema(**swagger_kwargs)
+            def post(self, request):
+                return super().post(request)
+
+        return DecoratedClass
+
+    return decorator
 
 
 class APIView(views.APIView, metaclass=ABCMeta):
@@ -233,6 +248,20 @@ class APIDetailView(views.APIView, metaclass=ABCMeta):
             )
 
 
+@apply_swagger_schema({"request_body": openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=["title", "date"],
+            properties={
+                'category': openapi.Schema(type=openapi.TYPE_STRING, default="other"),
+                'notification_type': openapi.Schema(type=openapi.TYPE_STRING, default="<set in user settings>", enum=["email", "sms"]),
+                'title': openapi.Schema(type=openapi.TYPE_STRING),
+                'date': openapi.Schema(type=openapi.TYPE_STRING, pattern=regex_dict["date"]),
+                'time': openapi.Schema(type=openapi.TYPE_STRING, default="<set in user settings>", pattern=regex_dict["time"]),
+                'notice_time': openapi.Schema(type=openapi.TYPE_STRING, default="-", pattern=regex_dict["interval_and_notice"]+' OR "-"'),
+                'interval': openapi.Schema(type=openapi.TYPE_STRING, default="-", pattern=regex_dict["interval_and_notice"]+' OR "-"'),
+                'info': openapi.Schema(type=openapi.TYPE_STRING),
+                'utc_offset': openapi.Schema(type=openapi.TYPE_STRING, default="<set in user settings>", pattern=regex_dict["utc_offset"]),
+            })})
 class EventAPIView(APIView):
     """An APIView for storing and getting events"""
 
@@ -248,6 +277,14 @@ class EventAPIDetailView(APIDetailView):
     serializer_class = EventSerializer
 
 
+@apply_swagger_schema({"request_body": openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['info'],
+            properties={
+                'category': openapi.Schema(type=openapi.TYPE_STRING, default="other"),
+                'title': openapi.Schema(type=openapi.TYPE_STRING),
+                'info': openapi.Schema(type=openapi.TYPE_STRING),
+            })})
 class NoteAPIView(APIView):
     """An APIView for storing and getting notes"""
 

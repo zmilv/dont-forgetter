@@ -3,11 +3,11 @@ from abc import ABCMeta, abstractmethod
 
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 
 from core.models import Event, Note
 from core.serializers import EventSerializer, NoteSerializer
@@ -172,11 +172,18 @@ class APIView(views.APIView, metaclass=ABCMeta):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    query_description = 'Defines the filter to be applied to the data set. Available operators: equal, and, or, not, greater_than, less_than. Some operators can be combined. See readme at https://github.com/zmilv/dont-forgetter for usage examples.'
+    query_description = "Defines the filter to be applied to the data set. Available operators: equal, and, or, not, greater_than, less_than. Some operators can be combined. See readme at https://github.com/zmilv/dont-forgetter for usage examples."
 
-    @swagger_auto_schema(manual_parameters=[
-        openapi.Parameter('query', openapi.IN_QUERY, description=query_description, type=openapi.TYPE_STRING)
-    ])
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "query",
+                openapi.IN_QUERY,
+                description=query_description,
+                type=openapi.TYPE_STRING,
+            )
+        ]
+    )
     def get(self, request):
         try:
             user = request.user
@@ -253,20 +260,47 @@ class APIDetailView(views.APIView, metaclass=ABCMeta):
             )
 
 
-@apply_swagger_schema({"request_body": openapi.Schema(
+@apply_swagger_schema(
+    {
+        "request_body": openapi.Schema(
             type=openapi.TYPE_OBJECT,
             required=["title", "date"],
             properties={
-                'category': openapi.Schema(type=openapi.TYPE_STRING, default="other"),
-                'notification_type': openapi.Schema(type=openapi.TYPE_STRING, default="<set in user settings>", enum=["email", "sms"]),
-                'title': openapi.Schema(type=openapi.TYPE_STRING),
-                'date': openapi.Schema(type=openapi.TYPE_STRING, pattern=regex_dict["date"]),
-                'time': openapi.Schema(type=openapi.TYPE_STRING, default="<set in user settings>", pattern=regex_dict["time"]),
-                'notice_time': openapi.Schema(type=openapi.TYPE_STRING, default="-", pattern=regex_dict["interval_and_notice"]+' OR "-"'),
-                'interval': openapi.Schema(type=openapi.TYPE_STRING, default="-", pattern=regex_dict["interval_and_notice"]+' OR "-"'),
-                'info': openapi.Schema(type=openapi.TYPE_STRING),
-                'utc_offset': openapi.Schema(type=openapi.TYPE_STRING, default="<set in user settings>", pattern=regex_dict["utc_offset"]),
-            })})
+                "category": openapi.Schema(type=openapi.TYPE_STRING, default="other"),
+                "notification_type": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default="<set in user settings>",
+                    enum=["email", "sms"],
+                ),
+                "title": openapi.Schema(type=openapi.TYPE_STRING),
+                "date": openapi.Schema(
+                    type=openapi.TYPE_STRING, pattern=regex_dict["date"]
+                ),
+                "time": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default="<set in user settings>",
+                    pattern=regex_dict["time"],
+                ),
+                "notice_time": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default="-",
+                    pattern=regex_dict["interval_and_notice"] + ' OR "-"',
+                ),
+                "interval": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default="-",
+                    pattern=regex_dict["interval_and_notice"] + ' OR "-"',
+                ),
+                "info": openapi.Schema(type=openapi.TYPE_STRING),
+                "utc_offset": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default="<set in user settings>",
+                    pattern=regex_dict["utc_offset"],
+                ),
+            },
+        )
+    }
+)
 class EventAPIView(APIView):
     """An APIView for storing and getting events"""
 
@@ -282,14 +316,19 @@ class EventAPIDetailView(APIDetailView):
     serializer_class = EventSerializer
 
 
-@apply_swagger_schema({"request_body": openapi.Schema(
+@apply_swagger_schema(
+    {
+        "request_body": openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['info'],
+            required=["info"],
             properties={
-                'category': openapi.Schema(type=openapi.TYPE_STRING, default="other"),
-                'title': openapi.Schema(type=openapi.TYPE_STRING),
-                'info': openapi.Schema(type=openapi.TYPE_STRING),
-            })})
+                "category": openapi.Schema(type=openapi.TYPE_STRING, default="other"),
+                "title": openapi.Schema(type=openapi.TYPE_STRING),
+                "info": openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        )
+    }
+)
 class NoteAPIView(APIView):
     """An APIView for storing and getting notes"""
 

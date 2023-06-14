@@ -2,12 +2,11 @@ import re
 
 from rest_framework import serializers
 
-
 regex_dict = {
     "date": "^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$",  # yyyy-mm-dd
     "time": "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",  # hh:mm
     "interval_and_notice": "^\d+(y|m|d|h|min)$",
-    "utc_offset": "^[+-]\d{1,2}:?\d{0,2}$"  # +/-h(:mm)
+    "utc_offset": "^[+-]\d{1,2}:?\d{0,2}$",  # +/-h(:mm)
 }
 
 units_translation_dict = {

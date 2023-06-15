@@ -172,7 +172,9 @@ class APIView(views.APIView, metaclass=ABCMeta):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    query_description = "Defines the filter to be applied to the data set. Available operators: equal, and, or, not, greater_than, less_than. Some operators can be combined. See readme at https://github.com/zmilv/dont-forgetter for usage examples."
+    query_description = "Defines the filter to be applied to the data set. Available operators: equal, and, or, not," \
+                        " greater_than, less_than. Some operators can be combined. See readme at " \
+                        "https://github.com/zmilv/dont-forgetter for usage examples."
 
     @swagger_auto_schema(
         manual_parameters=[

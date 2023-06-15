@@ -74,7 +74,7 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 
 ### Local set-up
 1. ```git clone```
-2. Copy .env.dev.template into .env.dev
+2. Create .env.dev out of .env.template
 3. Enter your SMTP e-mail credentials into .env.dev
 4. Get the docker image running ```docker-compose up --build```
 

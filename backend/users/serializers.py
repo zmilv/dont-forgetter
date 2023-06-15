@@ -50,4 +50,9 @@ class UserSettingsSerializer(CustomUserSerializer):
 
     class Meta:
         model = UserSettings
-        fields = ("default_time",)
+        fields = (
+            "default_notification_type",
+            "default_time",
+            "default_utc_offset",
+            "phone_number",
+        )

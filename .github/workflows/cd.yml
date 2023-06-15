@@ -40,6 +40,8 @@ jobs:
         echo EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }} >> env_vars/.env.prod
         echo EMAIL_PORT=${{ secrets.EMAIL_PORT }} >> env_vars/.env.prod
         echo DJANGO_ALLOWED_HOSTS=${{ secrets.DJANGO_ALLOWED_HOSTS }} >> env_vars/.env.prod
+        echo VONAGE_API_KEY=${{ secrets.VONAGE_API_KEY }} >> env_vars/.env.prod
+        echo VONAGE_API_SECRET=${{ secrets.VONAGE_API_SECRET }} >> env_vars/.env.prod
     - name: Set environment variables
       run: |
         echo "DJANGO_IMAGE=$(echo ${{env.DJANGO_IMAGE}} )" >> $GITHUB_ENV
@@ -105,6 +107,8 @@ jobs:
         echo NGINX_IMAGE=${{ env.NGINX_IMAGE }} >> env_vars/.env.prod
         echo NAMESPACE=${{ secrets.NAMESPACE }} >> env_vars/.env.prod
         echo PERSONAL_ACCESS_TOKEN=${{ secrets.PERSONAL_ACCESS_TOKEN }} >> env_vars/.env.prod
+        echo VONAGE_API_KEY=${{ secrets.VONAGE_API_KEY }} >> env_vars/.env.prod
+        echo VONAGE_API_SECRET=${{ secrets.VONAGE_API_SECRET }} >> env_vars/.env.prod
     - name: Add the private SSH key to the ssh-agent
       env:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock

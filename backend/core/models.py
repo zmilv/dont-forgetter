@@ -3,10 +3,12 @@ from datetime import datetime, timedelta, timezone
 
 from django.conf import settings
 from django.db import models
+from rest_framework import serializers
 
 from core.validators import (
     date_validator,
     interval_and_notice_validator,
+    notification_type_validator,
     time_validator,
     units_translation_dict,
     utc_offset_validator,
@@ -63,7 +65,7 @@ class Event(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    type = models.CharField(max_length=70, default="other")
+    category = models.CharField(max_length=70, default="other")
     title = models.CharField(max_length=100)
     date = models.CharField(max_length=10, validators=[date_validator])
     time = models.CharField(max_length=5, default="", validators=[time_validator])
@@ -77,6 +79,9 @@ class Event(models.Model):
     utc_offset = models.CharField(
         max_length=6, default="", validators=[utc_offset_validator]
     )
+    notification_type = models.CharField(
+        max_length=10, default="", validators=[notification_type_validator]
+    )
     utc_timestamp = models.IntegerField(editable=False)
 
     def save(self, *args, **kwargs):
@@ -85,13 +90,20 @@ class Event(models.Model):
             self.time = user_settings.default_time
         if not self.utc_offset:
             self.utc_offset = user_settings.default_utc_offset
+        if not self.notification_type:
+            self.notification_type = user_settings.default_notification_type
+        if self.notification_type == "sms":
+            if not user_settings.phone_number:
+                raise serializers.ValidationError(
+                    "Phone number needs to be entered in settings in order to use the SMS notification type."
+                )
         self.utc_timestamp = get_utc_timestamp(
             str(self.date), str(self.time), str(self.utc_offset), str(self.notice_time)
         )
         super(Event, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"ID{self.pk}({self.user.pk})|{self.type} - {self.title}"
+        return f"ID{self.pk}({self.user.pk})|{self.category} - {self.title}"
 
 
 class Note(models.Model):
@@ -100,7 +112,7 @@ class Note(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
-    type = models.CharField(max_length=70, default="other")
+    category = models.CharField(max_length=70, default="other")
     title = models.CharField(max_length=100, null=True, blank=True)
     info = models.TextField(max_length=3000)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -116,4 +128,4 @@ class Note(models.Model):
         super(Note, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"ID{self.pk}({self.user.pk})|{self.type} - {self.title}"
+        return f"ID{self.pk}({self.user.pk})|{self.category} - {self.title}"

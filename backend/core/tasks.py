@@ -53,24 +53,41 @@ def send_email(args_dict):
     text = args_dict["text"]
     email = args_dict["email"]
     try:
-        send_mail(title, text, None, [email], fail_silently=False)
-        return None
+        result = send_mail(title, text, None, [email], fail_silently=False)
+        logger.info("E-mail sent") if result == 1 else logger.warning("E-mail sending failed")
+        return result
     except Exception as e:
         logger.exception(e)
         raise
 
 
 def build_notification_title_and_text(event):
-    notification_title = f"Time for {event.title} ({event.category}) !"
+    category = event.category
+    title = event.title
+    date = event.date
+    time = event.time
+    notice_time = event.notice_time
+    interval = event.interval
+    info = event.info
 
-    notification_text = f"It is time for {event.title} ({event.category})"
-    if event.notice_time != "-":
-        notification_text += f" in {event.notice_time}"
+    notification_title = f"Time for {title}"
+    if category != "other":
+        notification_title += f" ({category})"
+    notification_title += "!"
+
+    notification_text = f"It is time for {title}"
+    if category != "other":
+        notification_text += f" ({category})"
+    if notice_time != "-":
+        notification_text += f" in {notice_time}"
     notification_text += "."
-    if event.interval != "-":
-        notification_text += f" Next such event scheduled in {event.interval}."
-    if event.info:
-        notification_text += f" Info: {event.info}"
+    notification_text += f"\n(Scheduled for {date} {time})"
+    if interval != "-":
+        notification_text += f"\nNext such event scheduled in {interval}."
+    if info:
+        notification_text += f"\nInfo: {info}"
+    notification_text += "\n\ndont-forgetter"
+
     return notification_title, notification_text
 
 

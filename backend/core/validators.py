@@ -7,6 +7,7 @@ regex_dict = {
     "time": "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",  # hh:mm
     "interval_and_notice": "^\d+(y|m|d|h|min)$",
     "utc_offset": "^[+-]\d{1,2}:?\d{0,2}$",  # +/-h(:mm)
+    "phone_number": "370\d{8}"
 }
 
 units_translation_dict = {
@@ -53,4 +54,15 @@ def notification_type_validator(value):
     if value not in ("email", "sms"):
         raise serializers.ValidationError(
             'Invalid notification type. Currently available choices: email, sms'
+        )
+
+
+def phone_number_validator(value):
+    if value[0] == "+":
+        value = value[1:]
+    regex = regex_dict["phone_number"]
+    if not re.fullmatch(regex, value):
+        raise serializers.ValidationError(
+            "Invalid phone number. Currently only Lithuanian numbers are accepted. Number has to start with 370 and"
+            " consist of 11 digits in total."
         )

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 from django.conf import settings
 from django.db import models
+from rest_framework import serializers
 
 from core.validators import (
     date_validator,
@@ -91,6 +92,11 @@ class Event(models.Model):
             self.utc_offset = user_settings.default_utc_offset
         if not self.notification_type:
             self.notification_type = user_settings.default_notification_type
+        if self.notification_type == "sms":
+            if not user_settings.phone_number:
+                raise serializers.ValidationError(
+                    'Phone number needs to be entered in settings in order to use the SMS notification type.'
+                )
         self.utc_timestamp = get_utc_timestamp(
             str(self.date), str(self.time), str(self.utc_offset), str(self.notice_time)
         )

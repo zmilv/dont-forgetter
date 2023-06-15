@@ -82,7 +82,7 @@ class UserSettingsAPIView(views.APIView):
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                "phone_number": openapi.Schema(type=openapi.TYPE_STRING, pattern=regex_dict["phone_number"]),
+                "phone_number": openapi.Schema(type=openapi.TYPE_STRING, pattern=regex_dict["phone_number"], x_nullable=True),
                 "default_notification_type": openapi.Schema(type=openapi.TYPE_STRING, default="email", enum=["email", "sms"]),
                 "default_time": openapi.Schema(type=openapi.TYPE_STRING, default="10:00", pattern=regex_dict["time"]),
                 "default_utc_offset": openapi.Schema(type=openapi.TYPE_STRING, default="+0", pattern=regex_dict["utc_offset"]),

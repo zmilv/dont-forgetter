@@ -3,7 +3,12 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from core.validators import time_validator, utc_offset_validator, notification_type_validator, phone_number_validator
+from core.validators import (
+    notification_type_validator,
+    phone_number_validator,
+    time_validator,
+    utc_offset_validator,
+)
 from users.managers import CustomUserManager
 
 
@@ -21,7 +26,9 @@ class CustomUser(AbstractUser):
 
 class UserSettings(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    phone_number = models.CharField(max_length=15, null=True, blank=True, validators=[phone_number_validator])
+    phone_number = models.CharField(
+        max_length=15, null=True, blank=True, validators=[phone_number_validator]
+    )
     default_notification_type = models.CharField(
         max_length=10, default="email", validators=[notification_type_validator]
     )

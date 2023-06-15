@@ -100,7 +100,11 @@ class TestCeleryIntegration(SimpleTestCase):
 
     def test_heartbeat_without_interval(self):
         Event.objects.create(
-            title=f"Title-1", date="2020-01-01", time="10:00", notification_type="email", user=self.user
+            title=f"Title-1",
+            date="2020-01-01",
+            time="10:00",
+            notification_type="email",
+            user=self.user,
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should be deleted
@@ -165,7 +169,11 @@ class TestCeleryIntegration(SimpleTestCase):
 
     def test_heartbeat_without_expired_events(self):
         Event.objects.create(
-            title=f"Title-1", date="2020-01-01", time="11:00", notification_type="email", user=self.user
+            title=f"Title-1",
+            date="2020-01-01",
+            time="11:00",
+            notification_type="email",
+            user=self.user,
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should remain unchanged

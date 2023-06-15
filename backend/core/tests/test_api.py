@@ -23,7 +23,7 @@ class POSTTestSuite(APITestCase):
             "interval": "10min",
             "notice_time": "10min",
             "info": "description",
-            "notification_type": "email"
+            "notification_type": "email",
         }
         self.url = "/event/"
 

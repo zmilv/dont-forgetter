@@ -8,10 +8,10 @@ from rest_framework import serializers
 from core.validators import (
     date_validator,
     interval_and_notice_validator,
+    notification_type_validator,
     time_validator,
     units_translation_dict,
     utc_offset_validator,
-    notification_type_validator
 )
 from users.models import UserSettings
 
@@ -95,7 +95,7 @@ class Event(models.Model):
         if self.notification_type == "sms":
             if not user_settings.phone_number:
                 raise serializers.ValidationError(
-                    'Phone number needs to be entered in settings in order to use the SMS notification type.'
+                    "Phone number needs to be entered in settings in order to use the SMS notification type."
                 )
         self.utc_timestamp = get_utc_timestamp(
             str(self.date), str(self.time), str(self.utc_offset), str(self.notice_time)

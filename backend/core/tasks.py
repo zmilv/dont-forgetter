@@ -1,8 +1,8 @@
-import os
 import logging
+import os
 from datetime import datetime, timedelta, timezone
-import requests
 
+import requests
 from celery import chain, shared_task
 from django.core.mail import send_mail
 
@@ -31,13 +31,13 @@ def send_sms(args_dict):
         with requests.Session() as session:
             phone_number = args_dict["phone_number"]
             text = args_dict["text"]
-            url = 'https://rest.nexmo.com/sms/json'
+            url = "https://rest.nexmo.com/sms/json"
             params = {
-                'api_key': api_key,
-                'api_secret': api_secret,
-                'from': 'dont-forgetter',
-                'to': phone_number,
-                'text': text
+                "api_key": api_key,
+                "api_secret": api_secret,
+                "from": "dont-forgetter",
+                "to": phone_number,
+                "text": text,
             }
             response = session.post(url, data=params)
             logger.info(f"SMS response: {response.json()}")
@@ -54,7 +54,9 @@ def send_email(args_dict):
     email = args_dict["email"]
     try:
         result = send_mail(title, text, None, [email], fail_silently=False)
-        logger.info("E-mail sent") if result == 1 else logger.warning("E-mail sending failed")
+        logger.info("E-mail sent") if result == 1 else logger.warning(
+            "E-mail sending failed"
+        )
         return result
     except Exception as e:
         logger.exception(e)
@@ -102,10 +104,12 @@ def send_notification(event_pk):
         logger.info(f"{event} - Sending notification")
         logger.info(f"{event.date} {event.time}")
         notification_title, notification_text = build_notification_title_and_text(event)
-        args_dict = {"title": notification_title,
-                     "text": notification_text,
-                     "email": event.user.email,
-                     "phone_number": user_settings.phone_number}
+        args_dict = {
+            "title": notification_title,
+            "text": notification_text,
+            "email": event.user.email,
+            "phone_number": user_settings.phone_number,
+        }
         notification_func = notification_funcs[event.notification_type]
         notification_func.delay(args_dict)
         # send_windows_popup.delay(notification_title, notification_text)

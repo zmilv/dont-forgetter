@@ -1,5 +1,7 @@
+import os
 import logging
 from datetime import datetime, timedelta, timezone
+import requests
 
 from celery import chain, shared_task
 from django.core.mail import send_mail
@@ -9,15 +11,40 @@ from users.models import UserSettings
 
 logger = logging.getLogger(__name__)
 
+api_key = os.environ.get("VONAGE_API_KEY")
+api_secret = os.environ.get("VONAGE_API_SECRET")
+
 
 @shared_task()
-def send_windows_popup(title, text):  # For local development only
+def send_windows_popup(title, text):  # For local Windows development only
     import ctypes
     import winsound
 
     winsound.Beep(440, 1000)  # 440Hz, 1000ms
     ctypes.windll.user32.MessageBoxW(0, text, title, 0)
     return None
+
+
+@shared_task()
+def send_sms(args_dict):
+    try:
+        with requests.Session() as session:
+            phone_number = args_dict["phone_number"]
+            text = args_dict["text"]
+            url = 'https://rest.nexmo.com/sms/json'
+            params = {
+                'api_key': api_key,
+                'api_secret': api_secret,
+                'from': 'dont-forgetter',
+                'to': phone_number,
+                'text': text
+            }
+            response = session.post(url, data=params)
+            logger.info(f"SMS response: {response.json()}")
+            return None
+    except Exception as e:
+        logger.exception(e)
+        raise
 
 
 @shared_task()

@@ -99,7 +99,7 @@ class TestEventModel(TestCase):
 
     def test_default_fields(self):
         default_fields = {
-            "type": "other",
+            "category": "other",
             "time": "10:00",
             "notice_time": "-",
             "interval": "-",

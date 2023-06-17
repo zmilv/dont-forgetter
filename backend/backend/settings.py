@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -162,7 +163,11 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULE = {
     "heartbeat": {
         "task": "core.tasks.heartbeat",
-        "schedule": 20.0,
+        "schedule": 20.0,  # Every 20 seconds
+    },
+    "reset_notifications_left": {
+        "task": "core.tasks.reset_notifications_left",
+        "schedule": crontab(0, 0, day_of_month='1')  # First day of every month
     }
 }
 

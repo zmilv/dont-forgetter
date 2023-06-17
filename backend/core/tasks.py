@@ -8,6 +8,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 from core.models import Event, parse_notice_time_or_interval
+from users.models import CustomUser
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ def decrement_notifications_left(event):
         logger.info(f"Event {event} rejected due to notification limit")
         notification_limit_message = f"Unfortunately you have no {notification_type} notifications left for this" \
                                      f" month. Please contact {settings.CONTACT_EMAIL} if you would like to have this" \
-                                     f" limit lifted."
+                                     f" limit lifted.{settings.MESSAGE_SIGNATURE}"
         send_email_args_dict = {
             "title": f"{notification_type} notification limit reached".capitalize(),
             "text": notification_limit_message,
@@ -97,7 +98,7 @@ def build_notification_title_and_text(event):
         notification_text += f"\nNext such event scheduled in {interval}."
     if info:
         notification_text += f"\nInfo: {info}"
-    notification_text += "\n\ndont-forgetter"
+    notification_text += settings.MESSAGE_SIGNATURE
 
     return notification_title, notification_text
 
@@ -192,3 +193,9 @@ def heartbeat():
     except Exception as e:
         logger.exception(e)
         raise
+
+
+@shared_task()
+def reset_notifications_left():
+    CustomUser.objects.all().update(email_notifications_left=settings.NO_OF_FREE_EMAIL_NOTIFICATIONS,
+                                    sms_notifications_left=settings.NO_OF_FREE_SMS_NOTIFICATIONS)

@@ -6,7 +6,7 @@
 >Browsable API link: https://dont-forgetter.rest \
 >Swagger documentation: https://dont-forgetter.rest/docs/
 
-The application provides a RESTful API that allows users to create notes and set reminders for specific dates and times. Users can choose the type of notification they prefer, such as email, ~~SMS, Discord message, or push notification~~ (coming soon) and the application will send the notification at the scheduled time. 
+The application provides a RESTful API that allows users to create notes and set reminders for specific dates and times. Users can choose the type of notification they prefer, such as email, SMS or ~~Discord message~~ (coming soon) and the application will send the notification at the scheduled time. 
 
 In addition, the API supports CRUD operations for notes, allowing users to create, retrieve, update, and delete notes as needed. The API also provides an endpoint to view upcoming reminders, as well as the ability to edit or delete them. The reminders and notes can be organized into types for easier management. Authentication is supported to ensure secure access to the user's data.
 
@@ -49,7 +49,7 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 ### Event fields
 | Field             | Type                | Examples            |
 |-------------------|---------------------|---------------------|
-| id                | integer (automatic) |                     |
+| id                | integer (read-only) |                     |
 | notification_type | string              | "email", "sms"      |
 | category          | string              | "birthday", "uni"   |
 | title             | string (required)   |                     |
@@ -63,12 +63,12 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 ### Note fields
 | Field      | Type                | Examples           |
 |------------|---------------------|--------------------|
-| id         | integer (automatic) |                    |
+| id         | integer (read-only) |                    |
 | category   | string              |                    |
 | title      | string (required)   |                    |
 | info       | string (required)   |                    |
-| created_at | string (automatic)  | "2023-05-15 14:00" |
-| updated_at | string (automatic)  | "2023-05-15 14:00" |
+| created_at | string (read-only)  | "2023-05-15 14:00" |
+| updated_at | string (read-only)  | "2023-05-15 14:00" |
 
 ---
 
@@ -87,4 +87,6 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 
 ### Future plans
 - React Native front-end
+- Email and phone number verification
+- Encryption
 - More notification types

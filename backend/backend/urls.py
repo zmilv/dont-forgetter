@@ -2,12 +2,9 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view as swagger_get_schema_view
-from rest_framework import routers
 
 from core import views
 
-router = routers.DefaultRouter()
-urlpatterns = router.urls
 
 schema_view = swagger_get_schema_view(
     openapi.Info(
@@ -18,7 +15,7 @@ schema_view = swagger_get_schema_view(
     public=True,
 )
 
-urlpatterns += [
+urlpatterns = [
     path("docs/", schema_view.with_ui("swagger", cache_timeout=0), name="docs"),
     path("admin/", admin.site.urls),
     path("event/", views.EventAPIView.as_view()),

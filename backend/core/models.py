@@ -93,7 +93,7 @@ class Event(models.Model):
         if not self.notification_type:
             self.notification_type = user_settings.default_notification_type
         if self.notification_type == "sms":
-            if not user_settings.phone_number:
+            if not self.user.phone_number:
                 raise serializers.ValidationError(
                     "Phone number needs to be entered in settings in order to use the SMS notification type."
                 )

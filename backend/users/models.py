@@ -14,6 +14,11 @@ from users.managers import CustomUserManager
 
 class CustomUser(AbstractUser):
     email = models.EmailField(_("email address"), unique=True)
+    phone_number = models.CharField(
+        max_length=15, null=True, blank=True, validators=[phone_number_validator]
+    )
+    email_notifications_left = models.IntegerField(default=settings.NO_OF_FREE_EMAIL_NOTIFICATIONS, editable=False)
+    sms_notifications_left = models.IntegerField(default=settings.NO_OF_FREE_SMS_NOTIFICATIONS, editable=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
@@ -26,9 +31,6 @@ class CustomUser(AbstractUser):
 
 class UserSettings(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    phone_number = models.CharField(
-        max_length=15, null=True, blank=True, validators=[phone_number_validator]
-    )
     default_notification_type = models.CharField(
         max_length=10, default="email", validators=[notification_type_validator]
     )

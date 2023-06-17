@@ -11,7 +11,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("id", "username", "email")
+        fields = ("id",
+                  "username",
+                  "email",
+                  "phone_number",
+                  "email_notifications_left",
+                  "sms_notifications_left",
+                  )
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -54,5 +60,4 @@ class UserSettingsSerializer(CustomUserSerializer):
             "default_notification_type",
             "default_time",
             "default_utc_offset",
-            "phone_number",
         )

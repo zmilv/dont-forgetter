@@ -32,13 +32,13 @@ class CustomUser(AbstractUser):
 class UserSettings(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     default_notification_type = models.CharField(
-        max_length=10, default="email", validators=[notification_type_validator]
+        max_length=10, default=settings.DEFAULT_NOTIFICATION_TYPE, validators=[notification_type_validator]
     )
     default_time = models.CharField(
-        max_length=5, default="10:00", validators=[time_validator]
+        max_length=5, default=settings.DEFAULT_TIME, validators=[time_validator]
     )
     default_utc_offset = models.CharField(
-        max_length=6, default="+0", validators=[utc_offset_validator]
+        max_length=6, default=settings.DEFAULT_UTC_OFFSET, validators=[utc_offset_validator]
     )
 
     def __str__(self):

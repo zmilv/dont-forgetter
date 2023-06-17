@@ -215,3 +215,15 @@ SIMPLE_JWT = {
 }
 
 CSRF_TRUSTED_ORIGINS = ["https://*.dont-forgetter.rest", "https://*.127.0.0.1"]
+
+
+# dont-forgetter
+
+DEFAULT_NOTIFICATION_TYPE = "email"
+DEFAULT_TIME = "10:00"
+DEFAULT_UTC_OFFSET = "+3"
+NO_OF_FREE_EMAIL_NOTIFICATIONS = 3
+NO_OF_FREE_SMS_NOTIFICATIONS = 10
+MAX_NOTIFICATION_RETRIES = 3
+MESSAGE_SIGNATURE = "\n\ndont-forgetter.rest"
+CONTACT_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")

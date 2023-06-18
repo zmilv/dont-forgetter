@@ -3,11 +3,11 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import requests
-from celery import chain, shared_task
+from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 
-from core.models import Event, parse_notice_time_or_interval
+from core.models import Event, parse_notice_time_or_interval, apply_utc_offset
 from users.models import CustomUser
 
 logger = logging.getLogger(__name__)
@@ -29,13 +29,12 @@ def decrement_notifications_left(event):
             "text": notification_limit_message,
             "email": event.user.email
         }
-        send_email.delay(send_email_args_dict)
+        send_email(send_email_args_dict)
     notifications_left -= 1
     setattr(event.user, f"{event.notification_type}_notifications_left", notifications_left)
     event.user.save()
 
 
-@shared_task()
 def send_sms(args_dict):
     try:
         with requests.Session() as session:
@@ -57,7 +56,6 @@ def send_sms(args_dict):
         raise
 
 
-@shared_task()
 def send_email(args_dict):
     title = args_dict["title"]
     text = args_dict["text"]
@@ -106,10 +104,8 @@ def build_notification_title_and_text(event):
 notification_funcs = {"email": send_email, "sms": send_sms}
 
 
-@shared_task()
-def send_notification(event_pk):
+def send_notification(event):
     try:
-        event = Event.objects.get(pk=event_pk)
         notification_type = event.notification_type
         if getattr(event.user, f"{notification_type}_notifications_left") > 0:
             logger.info(f"{event} - Sending notification")
@@ -122,8 +118,8 @@ def send_notification(event_pk):
                 "phone_number": event.user.phone_number,
             }
             notification_func = notification_funcs[notification_type]
-            notification_func.delay(args_dict)
-        decrement_notifications_left(event)
+            notification_func(args_dict)
+            decrement_notifications_left(event)
         return None
     except Exception as e:
         logger.exception(e)
@@ -161,10 +157,8 @@ def reschedule_event(event, current_utc_timestamp):
     event.save()
 
 
-@shared_task()
-def reschedule_or_delete_event(event_pk, current_utc_timestamp):
+def reschedule_or_delete_event(event, current_utc_timestamp):
     try:
-        event = Event.objects.get(pk=event_pk)
         if event.interval == "-":
             logger.info(f"{event} - Deleting")
             event.delete()
@@ -177,6 +171,13 @@ def reschedule_or_delete_event(event_pk, current_utc_timestamp):
 
 
 @shared_task()
+def send_notification_and_reschedule_or_delete_event(event_pk, current_utc_timestamp):
+    event = Event.objects.get(pk=event_pk)
+    send_notification(event)
+    reschedule_or_delete_event(event, current_utc_timestamp)
+
+
+@shared_task()
 def heartbeat():
     try:
         current_datetime = datetime.now(timezone.utc)
@@ -186,11 +187,8 @@ def heartbeat():
         result = []
         for event in expired_events:
             logger.info(f"{event} - Expired")
-            chain_result = chain(
-                send_notification.si(event.pk)
-                | reschedule_or_delete_event.si(event.pk, current_utc_timestamp)
-            )()
-            result.append(chain_result.as_list())
+            task_id = send_notification_and_reschedule_or_delete_event.delay(event.pk, current_utc_timestamp)
+            result.append(task_id)
         return result
     except Exception as e:
         logger.exception(e)

@@ -130,15 +130,17 @@ def send_notification(event_pk):
         raise
 
 
-def get_new_date_and_time(old_date, old_time, interval, current_utc_timestamp):
+def get_new_date_and_time(old_date, old_time, interval, utc_offset, current_utc_timestamp):
     current_datetime = datetime.fromtimestamp(current_utc_timestamp, tz=timezone.utc)
     try:
         datetime_str = f"{old_date} {old_time}"
         datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").replace(
             tzinfo=timezone.utc
         )
+        datetime_object = apply_utc_offset(utc_offset, datetime_object)
         while datetime_object < current_datetime:
             datetime_object += timedelta(**parse_notice_time_or_interval(interval))
+        datetime_object = apply_utc_offset(utc_offset, datetime_object, reverse=True)
         datetime_str = datetime.strftime(datetime_object, "%Y-%m-%d %H:%M")
         new_date = datetime_str[:10]
         new_time = datetime_str[-5:]
@@ -151,7 +153,7 @@ def get_new_date_and_time(old_date, old_time, interval, current_utc_timestamp):
 def reschedule_event(event, current_utc_timestamp):
     logger.info(f"{event} - Rescheduling")
     new_date, new_time = get_new_date_and_time(
-        event.date, event.time, event.interval, current_utc_timestamp
+        event.date, event.time, event.interval, event.utc_offset, current_utc_timestamp
     )
     event.date = new_date
     event.time = new_time

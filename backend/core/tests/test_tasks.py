@@ -26,7 +26,7 @@ class TestTasks(TestCase):
 
     def test_get_new_date_and_time(self):
         result = get_new_date_and_time(
-            "2020-01-01", "10:00", "30min", self.current_timestamp
+            "2020-01-01", "10:00", "30min", "+0", self.current_timestamp
         )
         expected_result = ("2020-01-01", "10:30")
         self.assertEqual(result, expected_result)
@@ -103,6 +103,7 @@ class TestCeleryIntegration(SimpleTestCase):
             title=f"Title-1",
             date="2020-01-01",
             time="10:00",
+            utc_offset="+0",
             notification_type="email",
             user=self.user,
         )
@@ -125,6 +126,7 @@ class TestCeleryIntegration(SimpleTestCase):
             date="2020-01-01",
             time="10:00",
             interval="30min",
+            utc_offset="+0",
             notification_type="email",
             user=self.user,
         )
@@ -149,6 +151,7 @@ class TestCeleryIntegration(SimpleTestCase):
             date="2019-01-01",
             time="10:00",
             interval="30min",
+            utc_offset="+0",
             notification_type="email",
             user=self.user,
         )
@@ -172,6 +175,7 @@ class TestCeleryIntegration(SimpleTestCase):
             title=f"Title-1",
             date="2020-01-01",
             time="11:00",
+            utc_offset="+0",
             notification_type="email",
             user=self.user,
         )

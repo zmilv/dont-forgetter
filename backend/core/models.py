@@ -37,8 +37,10 @@ def parse_notice_time_or_interval(value):
     return {units: int(number)}
 
 
-def apply_utc_offset(utc_offset, datetime_object):
+def apply_utc_offset(utc_offset, datetime_object, reverse=False):
     plus_or_minus = -1 if utc_offset[0] == "+" else 1
+    if reverse:
+        plus_or_minus *= -1
     offset_split = [int(x) for x in utc_offset[1:].split(":")]
     offset_h = offset_split[0]
     offset_min = 0
@@ -47,12 +49,12 @@ def apply_utc_offset(utc_offset, datetime_object):
     utc_datetime = datetime_object + plus_or_minus * timedelta(
         hours=offset_h, minutes=offset_min
     )
-    return utc_datetime.replace(tzinfo=timezone.utc)
+    return utc_datetime
 
 
 def get_utc_timestamp(local_date, local_time, utc_offset, notice_time):
     datetime_str = f"{local_date} {local_time}"
-    datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+    datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
     utc_datetime = apply_utc_offset(utc_offset, datetime_object)
     if notice_time != "-":
         utc_datetime -= timedelta(**parse_notice_time_or_interval(notice_time))
@@ -123,7 +125,7 @@ class Note(models.Model):
             self.title = (
                 str(self.info)[:50] + "..."
                 if len(str(self.info)) > 50
-                else str(self.info)[:50]
+                else str(self.info)
             )
         super(Note, self).save(*args, **kwargs)
 

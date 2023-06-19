@@ -33,11 +33,11 @@ class TestTasks(TestCase):
 
     def test_reschedule_or_delete_event_without_interval(self):
         event = Event.objects.create(
-            title=f"Title-1", date="2020-01-01", time="10:00", user=self.user
+            title=f"Title-1", date="2020-01-01", time="10:00", utc_offset="+0", user=self.user
         )
         self.assertEqual(Event.objects.count(), 1)
         reschedule_or_delete_event(
-            event.pk, self.current_timestamp
+            event, self.current_timestamp
         )  # Event should be deleted
         self.assertEqual(Event.objects.count(), 0)
 
@@ -47,10 +47,11 @@ class TestTasks(TestCase):
             date="2020-01-01",
             time="10:00",
             interval="30min",
+            utc_offset="+0",
             user=self.user,
         )
         reschedule_or_delete_event(
-            event.pk, self.current_timestamp
+            event, self.current_timestamp
         )  # Event should be updated
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(Event.objects.get().title, "Title-1")
@@ -63,10 +64,11 @@ class TestTasks(TestCase):
             date="2019-01-01",
             time="10:00",
             interval="30min",
+            utc_offset="+0",
             user=self.user,
         )
         reschedule_or_delete_event(
-            event.pk, self.current_timestamp
+            event, self.current_timestamp
         )  # Event should be updated
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(Event.objects.get().title, "Title-1")
@@ -109,15 +111,12 @@ class TestCeleryIntegration(SimpleTestCase):
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should be deleted
+        heartbeat_task.get()
         result = heartbeat_task.get()
-        reschedule_or_delete_id, send_notification_id = result[0][0], result[0][1]
-        send_notification_task = AsyncResult(send_notification_id, app=app)
-        reschedule_or_delete_task = AsyncResult(reschedule_or_delete_id, app=app)
-        send_notification_task.get()
-        reschedule_or_delete_task.get()
+        notification_and_reschedule_task = AsyncResult(id=result[0], app=app)
+        notification_and_reschedule_task.get()
         self.assertEqual(heartbeat_task.status, "SUCCESS")
-        self.assertEqual(send_notification_task.status, "SUCCESS")
-        self.assertEqual(reschedule_or_delete_task.status, "SUCCESS")
+        self.assertEqual(notification_and_reschedule_task.status, "SUCCESS")
         self.assertEqual(Event.objects.count(), 0)
 
     def test_heartbeat_with_interval(self):
@@ -132,15 +131,12 @@ class TestCeleryIntegration(SimpleTestCase):
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should be updated
+        heartbeat_task.get()
         result = heartbeat_task.get()
-        reschedule_or_delete_id, send_notification_id = result[0][0], result[0][1]
-        send_notification_task = AsyncResult(send_notification_id, app=app)
-        reschedule_or_delete_task = AsyncResult(reschedule_or_delete_id, app=app)
-        send_notification_task.get()
-        reschedule_or_delete_task.get()
+        notification_and_reschedule_task = AsyncResult(id=result[0], app=app)
+        notification_and_reschedule_task.get()
         self.assertEqual(heartbeat_task.status, "SUCCESS")
-        self.assertEqual(send_notification_task.status, "SUCCESS")
-        self.assertEqual(reschedule_or_delete_task.status, "SUCCESS")
+        self.assertEqual(notification_and_reschedule_task.status, "SUCCESS")
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(Event.objects.get().date, "2020-01-01")
         self.assertEqual(Event.objects.get().time, "10:30")
@@ -157,15 +153,12 @@ class TestCeleryIntegration(SimpleTestCase):
         )
         self.assertEqual(Event.objects.count(), 1)
         heartbeat_task = heartbeat.delay()  # Event should be updated
+        heartbeat_task.get()
         result = heartbeat_task.get()
-        reschedule_or_delete_id, send_notification_id = result[0][0], result[0][1]
-        send_notification_task = AsyncResult(send_notification_id, app=app)
-        reschedule_or_delete_task = AsyncResult(reschedule_or_delete_id, app=app)
-        send_notification_task.get()
-        reschedule_or_delete_task.get()
+        notification_and_reschedule_task = AsyncResult(id=result[0], app=app)
+        notification_and_reschedule_task.get()
         self.assertEqual(heartbeat_task.status, "SUCCESS")
-        self.assertEqual(send_notification_task.status, "SUCCESS")
-        self.assertEqual(reschedule_or_delete_task.status, "SUCCESS")
+        self.assertEqual(notification_and_reschedule_task.status, "SUCCESS")
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(Event.objects.get().date, "2020-01-01")
         self.assertEqual(Event.objects.get().time, "10:30")

@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import make_password
+from django.conf import settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -58,20 +59,21 @@ class GETTestSuite(APITestCase):
         self.url = "/event/?query="  # '/event?query=' gets redirected here
         for i in range(1, 3):  # 1 and 2
             Event.objects.create(
-                title=f"Title-{i}", date=f"2024-01-0{i}", user=self.user
+                title=f"Title-{i}", date=f"2024-01-0{i}", notification_type="email", user=self.user
             )
         self.id1_dict = dict(
             [
                 ("category", "other"),
                 ("title", "Title-1"),
                 ("date", "2024-01-01"),
-                ("time", "10:00"),
-                ("utc_offset", "+3"),
+                ("time", settings.DEFAULT_TIME),
+                ("utc_offset", settings.DEFAULT_UTC_OFFSET),
                 ("interval", "-"),
                 ("notification_type", "email"),
                 ("utc_timestamp", 1704092400),
                 ("notice_time", "-"),
                 ("info", None),
+                ("notification_retries_left", settings.MAX_NOTIFICATION_RETRIES)
             ]
         )
         self.id2_dict = dict(
@@ -79,13 +81,14 @@ class GETTestSuite(APITestCase):
                 ("category", "other"),
                 ("title", "Title-2"),
                 ("date", "2024-01-02"),
-                ("time", "10:00"),
-                ("utc_offset", "+3"),
+                ("time", settings.DEFAULT_TIME),
+                ("utc_offset", settings.DEFAULT_UTC_OFFSET),
                 ("interval", "-"),
                 ("notification_type", "email"),
                 ("utc_timestamp", 1704178800),
                 ("notice_time", "-"),
                 ("info", None),
+                ("notification_retries_left", settings.MAX_NOTIFICATION_RETRIES),
             ]
         )
 

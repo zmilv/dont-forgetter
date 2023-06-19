@@ -120,6 +120,14 @@ def send_notification(event):
         notification_sent = notification_func(args_dict)
         if notification_sent:
             decrement_notifications_left(event)
+            return True
+        else:
+            notification_retries_left = event.notification_retries_left
+            if notification_retries_left > 0:
+                notification_retries_left -= 1
+                return False
+            return True
+    return True
 
 
 def get_new_date_and_time(old_date, old_time, interval, utc_offset, current_utc_timestamp):
@@ -146,6 +154,7 @@ def reschedule_event(event, current_utc_timestamp):
     event.date = new_date
     event.time = new_time
     logger.info(f"New: {event.date} {event.time}")
+    event.notification_retries_left = settings.MAX_NOTIFICATION_RETRIES
     event.save()
 
 
@@ -161,8 +170,9 @@ def reschedule_or_delete_event(event, current_utc_timestamp):
 def send_notification_and_reschedule_or_delete_event(event_pk, current_utc_timestamp):
     try:
         event = Event.objects.get(pk=event_pk)
-        send_notification(event)
-        reschedule_or_delete_event(event, current_utc_timestamp)
+        not_to_be_retried = send_notification(event)
+        if not_to_be_retried:
+            reschedule_or_delete_event(event, current_utc_timestamp)
         return None
     except Exception as e:
         logger.exception(e)

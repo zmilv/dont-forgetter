@@ -85,6 +85,7 @@ class Event(models.Model):
         max_length=10, default="", validators=[notification_type_validator]
     )
     utc_timestamp = models.IntegerField(editable=False)
+    notification_retries_left = models.IntegerField(default=settings.MAX_NOTIFICATION_RETRIES)
 
     def save(self, *args, **kwargs):
         user_settings = UserSettings.objects.get(user=self.user)

@@ -4,11 +4,14 @@ from celery.contrib.testing.worker import start_worker
 from celery.result import AsyncResult
 from django.contrib.auth.hashers import make_password
 from django.test import SimpleTestCase, TestCase
+from django.conf import settings
 from freezegun import freeze_time
 
 from backend.celery import app
 from core.models import Event
-from core.tasks import get_new_date_and_time, heartbeat, reschedule_or_delete_event
+import core.tasks
+from core.tasks import get_new_date_and_time, heartbeat, reschedule_or_delete_event, reset_notifications_left,\
+    decrement_notifications_left, send_email, send_sms
 from users.models import CustomUser
 
 
@@ -74,6 +77,108 @@ class TestTasks(TestCase):
         self.assertEqual(Event.objects.get().title, "Title-1")
         self.assertEqual(Event.objects.get().date, "2020-01-01")
         self.assertEqual(Event.objects.get().time, "10:30")
+
+    def test_reset_notifications_left(self):
+        CustomUser.objects.create_user(
+            email="reset@email.com", username="reset", password=make_password("password"), email_notifications_left=0, sms_notifications_left=0
+        )
+        self.assertEqual(CustomUser.objects.get(username="reset").email_notifications_left, 0)
+        self.assertEqual(CustomUser.objects.get(username="reset").sms_notifications_left, 0)
+        reset_notifications_left()
+        self.assertEqual(CustomUser.objects.get(username="reset").email_notifications_left, settings.NO_OF_FREE_EMAIL_NOTIFICATIONS)
+        self.assertEqual(CustomUser.objects.get(username="reset").sms_notifications_left, settings.NO_OF_FREE_SMS_NOTIFICATIONS)
+
+    def test_decrement_notifications_left(self):
+        user = CustomUser.objects.create_user(
+            email="decrement@email.com", username="decrement", password=make_password("password"), email_notifications_left=10
+        )
+        event = Event.objects.create(
+            title=f"Title-1", date="2020-01-01", time="10:00", utc_offset="+0", user=user, notification_type="email"
+        )
+        result = decrement_notifications_left(event)
+        self.assertEqual(result, True)
+        self.assertEqual(CustomUser.objects.get(username="decrement").email_notifications_left, 9)
+
+    def test_decrement_notifications_left_on_last_notification(self):
+        user = CustomUser.objects.create_user(
+            email="decrement2@email.com", username="decrement2", password=make_password("password"), email_notifications_left=1
+        )
+        event = Event.objects.create(
+            title=f"Title-1", date="2020-01-01", time="10:00", utc_offset="+0", user=user, notification_type="email"
+        )
+        result = decrement_notifications_left(event)
+        self.assertEqual(result, False)
+        self.assertEqual(CustomUser.objects.get(username="decrement2").email_notifications_left, 0)
+
+
+class TestTasksWithMocking:
+    def test_send_email_success(self, mocker):
+        args_dict = {"title": "a",
+                     "text": "b",
+                     "email": "c"}
+        mocked_func = mocker.patch('core.tasks.send_mail', return_value=1)
+        result = send_email(args_dict)
+        mocked_func.assert_called_once_with(args_dict["title"], args_dict["text"], None, [args_dict["email"]], fail_silently=False)
+        assert result == True
+
+    def test_send_email_failed(self, mocker):
+        args_dict = {"title": "a",
+                     "text": "b",
+                     "email": "c"}
+        mocked_func = mocker.patch('core.tasks.send_mail', return_value=0)
+        result = send_email(args_dict)
+        mocked_func.assert_called_once_with(args_dict["title"], args_dict["text"], None, [args_dict["email"]], fail_silently=False)
+        assert result == False
+
+    def test_send_sms_success(self, mocker):
+        mocker.patch.object(core.tasks, "vonage_api_key", "key")
+        mocker.patch.object(core.tasks, "vonage_api_secret", "secret")
+        args_dict = {"phone_number": "a",
+                     "text": "b"}
+        url = "https://rest.nexmo.com/sms/json"
+        params = {
+            "api_key": "key",
+            "api_secret": "secret",
+            "from": "dont-forgetter",
+            "to": args_dict["phone_number"],
+            "text": args_dict["text"],
+        }
+
+        class MockResponse:
+            @staticmethod
+            def json():
+                return {"messages": {"status": "0"}}
+
+        mocked_func = mocker.patch('core.tasks.requests.Session.post', return_value=MockResponse)
+        result = send_sms(args_dict)
+        mocked_func.assert_called_once()
+        mocked_func.assert_called_once_with(url, data=params)
+        assert result == True
+
+    def test_send_sms_failed(self, mocker):
+        mocker.patch.object(core.tasks, "vonage_api_key", "key")
+        mocker.patch.object(core.tasks, "vonage_api_secret", "secret")
+        args_dict = {"phone_number": "a",
+                     "text": "b"}
+        url = "https://rest.nexmo.com/sms/json"
+        params = {
+            "api_key": "key",
+            "api_secret": "secret",
+            "from": "dont-forgetter",
+            "to": args_dict["phone_number"],
+            "text": args_dict["text"],
+        }
+
+        class MockResponse:
+            @staticmethod
+            def json():
+                return {"messages": {"status": "1"}}
+
+        mocked_func = mocker.patch('core.tasks.requests.Session.post', return_value=MockResponse)
+        result = send_sms(args_dict)
+        mocked_func.assert_called_once()
+        mocked_func.assert_called_once_with(url, data=params)
+        assert result == False
 
 
 @freeze_time("2020-01-01 10:05")  # Mocks current datetime
@@ -179,3 +284,15 @@ class TestCeleryIntegration(SimpleTestCase):
         self.assertEqual(Event.objects.count(), 1)
         self.assertEqual(Event.objects.get().date, "2020-01-01")
         self.assertEqual(Event.objects.get().time, "11:00")
+
+    def test_reset_notifications_left(self):
+        CustomUser.objects.create_user(
+            email="reset@email.com", username="reset", password=make_password("password"), email_notifications_left=0, sms_notifications_left=0
+        )
+        self.assertEqual(CustomUser.objects.get(username="reset").email_notifications_left, 0)
+        self.assertEqual(CustomUser.objects.get(username="reset").sms_notifications_left, 0)
+        task = reset_notifications_left.delay()
+        task.get()
+        self.assertEqual(task.status, "SUCCESS")
+        self.assertEqual(CustomUser.objects.get(username="reset").email_notifications_left, settings.NO_OF_FREE_EMAIL_NOTIFICATIONS)
+        self.assertEqual(CustomUser.objects.get(username="reset").sms_notifications_left, settings.NO_OF_FREE_SMS_NOTIFICATIONS)

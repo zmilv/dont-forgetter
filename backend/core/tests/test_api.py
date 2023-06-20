@@ -73,7 +73,6 @@ class GETTestSuite(APITestCase):
                 ("utc_timestamp", 1704092400),
                 ("notice_time", "-"),
                 ("info", None),
-                ("notification_retries_left", settings.MAX_NOTIFICATION_RETRIES)
             ]
         )
         self.id2_dict = dict(
@@ -88,7 +87,6 @@ class GETTestSuite(APITestCase):
                 ("utc_timestamp", 1704178800),
                 ("notice_time", "-"),
                 ("info", None),
-                ("notification_retries_left", settings.MAX_NOTIFICATION_RETRIES),
             ]
         )
 

@@ -12,11 +12,12 @@ from users.models import CustomUser
 
 logger = logging.getLogger(__name__)
 
-api_key = os.environ.get("VONAGE_API_KEY")
-api_secret = os.environ.get("VONAGE_API_SECRET")
+vonage_api_key = os.environ.get("VONAGE_API_KEY")
+vonage_api_secret = os.environ.get("VONAGE_API_SECRET")
 
 
 def decrement_notifications_left(event):
+    result = True
     notification_type = event.notification_type
     notifications_left = getattr(event.user, f"{notification_type}_notifications_left")
     if notifications_left == 1:
@@ -30,9 +31,11 @@ def decrement_notifications_left(event):
             "email": event.user.email
         }
         send_email(send_email_args_dict)
+        result = False
     notifications_left -= 1
     setattr(event.user, f"{event.notification_type}_notifications_left", notifications_left)
     event.user.save()
+    return result
 
 
 def send_sms(args_dict):
@@ -41,8 +44,8 @@ def send_sms(args_dict):
         text = args_dict["text"]
         url = "https://rest.nexmo.com/sms/json"
         params = {
-            "api_key": api_key,
-            "api_secret": api_secret,
+            "api_key": vonage_api_key,
+            "api_secret": vonage_api_secret,
             "from": "dont-forgetter",
             "to": phone_number,
             "text": text,

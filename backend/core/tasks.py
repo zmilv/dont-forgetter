@@ -125,9 +125,9 @@ def send_notification(event):
             decrement_notifications_left(event)
             return True
         else:
-            notification_retries_left = event.notification_retries_left
-            if notification_retries_left > 0:
-                notification_retries_left -= 1
+            if event.notification_retries_left > 0:
+                event.notification_retries_left -= 1
+                event.save()
                 return False
             return True
     return True

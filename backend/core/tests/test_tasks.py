@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import pytest
 
 from celery.contrib.testing.worker import start_worker
 from celery.result import AsyncResult
@@ -11,7 +12,7 @@ from backend.celery import app
 from core.models import Event
 import core.tasks
 from core.tasks import get_new_date_and_time, heartbeat, reschedule_or_delete_event, reset_notifications_left,\
-    decrement_notifications_left, send_email, send_sms
+    decrement_notifications_left, send_email, send_sms, send_notification
 from users.models import CustomUser
 
 
@@ -111,13 +112,16 @@ class TestTasks(TestCase):
         self.assertEqual(CustomUser.objects.get(username="decrement2").email_notifications_left, 0)
 
 
+@pytest.mark.django_db
 class TestTasksWithMocking:
     def test_send_email_success(self, mocker):
         args_dict = {"title": "a",
                      "text": "b",
                      "email": "c"}
         mocked_func = mocker.patch('core.tasks.send_mail', return_value=1)
+
         result = send_email(args_dict)
+
         mocked_func.assert_called_once_with(args_dict["title"], args_dict["text"], None, [args_dict["email"]], fail_silently=False)
         assert result == True
 
@@ -126,7 +130,9 @@ class TestTasksWithMocking:
                      "text": "b",
                      "email": "c"}
         mocked_func = mocker.patch('core.tasks.send_mail', return_value=0)
+
         result = send_email(args_dict)
+
         mocked_func.assert_called_once_with(args_dict["title"], args_dict["text"], None, [args_dict["email"]], fail_silently=False)
         assert result == False
 
@@ -150,7 +156,9 @@ class TestTasksWithMocking:
                 return {"messages": {"status": "0"}}
 
         mocked_func = mocker.patch('core.tasks.requests.Session.post', return_value=MockResponse)
+
         result = send_sms(args_dict)
+
         mocked_func.assert_called_once()
         mocked_func.assert_called_once_with(url, data=params)
         assert result == True
@@ -174,11 +182,93 @@ class TestTasksWithMocking:
             def json():
                 return {"messages": {"status": "1"}}
 
-        mocked_func = mocker.patch('core.tasks.requests.Session.post', return_value=MockResponse)
+        mocked_func = mocker.patch("core.tasks.requests.Session.post", return_value=MockResponse)
+
         result = send_sms(args_dict)
+
         mocked_func.assert_called_once()
         mocked_func.assert_called_once_with(url, data=params)
         assert result == False
+
+    def test_send_notification_success(self, mocker):
+        user = CustomUser.objects.create_user(
+            email="user@email.com", username="user", password=make_password("password"),
+            email_notifications_left=1
+        )
+        event = Event.objects.create(
+            title=f"Title-1", date="2020-01-01", time="10:00", utc_offset="+0", user=user, notification_type="email"
+        )
+        mocker.patch("core.tasks.build_notification_title_and_text", return_value=("mock_title", "mock_text"))
+        args_dict = {
+            "title": "mock_title",
+            "text": "mock_text",
+            "email": event.user.email,
+            "phone_number": event.user.phone_number,
+        }
+        # mocked_send_email_func = mocker.patch("core.tasks.send_email", return_value=True)
+        mocked_send_email_func = mocker.patch("core.tasks.send_mail", return_value=1)
+        mocked_decrement_func = mocker.patch("core.tasks.decrement_notifications_left")
+
+        result = send_notification(event)
+
+        assert result == True
+        mocked_send_email_func.assert_called_once()
+        # mocked_send_email_func.assert_called_once_with(args_dict)
+        mocked_decrement_func.assert_called_once_with(event)
+
+    def test_send_notification_out_of_notifications(self, mocker):
+        user = CustomUser.objects.create_user(
+            email="user@email.com", username="user", password=make_password("password"),
+            email_notifications_left=0
+        )
+        event = Event.objects.create(
+            title=f"Title-1", date="2020-01-01", time="10:00", utc_offset="+0", user=user, notification_type="email"
+        )
+        mocker.patch("core.tasks.build_notification_title_and_text", return_value=("mock_title", "mock_text"))
+        mocked_send_email_func = mocker.patch("core.tasks.send_mail")
+
+        result = send_notification(event)
+
+        assert result == True
+        mocked_send_email_func.assert_not_called()
+
+    def test_send_notification_failed(self, mocker):
+        user = CustomUser.objects.create_user(
+            email="user@email.com", username="user", password=make_password("password"),
+            email_notifications_left=1
+        )
+        event = Event.objects.create(
+            title=f"Title-1", date="2020-01-01", time="10:00", utc_offset="+0", user=user, notification_type="email", notification_retries_left=1
+        )
+        mocker.patch("core.tasks.build_notification_title_and_text", return_value=("mock_title", "mock_text"))
+        mocked_send_email_func = mocker.patch("core.tasks.send_mail", return_value=0)
+        mocked_decrement_func = mocker.patch("core.tasks.decrement_notifications_left")
+
+        result = send_notification(event)
+
+        assert result == False
+        mocked_send_email_func.assert_called_once()
+        mocked_decrement_func.assert_not_called()
+        assert event.notification_retries_left == 0
+
+    def test_send_notification_failed_out_of_retries(self, mocker):
+        user = CustomUser.objects.create_user(
+            email="user@email.com", username="user", password=make_password("password"),
+            email_notifications_left=1
+        )
+        event = Event.objects.create(
+            title=f"Title-1", date="2020-01-01", time="10:00", utc_offset="+0", user=user, notification_type="email", notification_retries_left=0
+        )
+        mocker.patch("core.tasks.build_notification_title_and_text", return_value=("mock_title", "mock_text"))
+        mocked_send_email_func = mocker.patch("core.tasks.send_mail", return_value=0)
+        mocked_decrement_func = mocker.patch("core.tasks.decrement_notifications_left")
+
+        result = send_notification(event)
+
+        assert result == True
+        mocked_send_email_func.assert_called_once()
+        mocked_decrement_func.assert_not_called()
+        assert event.notification_retries_left == 0
 
 
 @freeze_time("2020-01-01 10:05")  # Mocks current datetime

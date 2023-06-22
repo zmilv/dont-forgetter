@@ -113,7 +113,7 @@ class TestTasks(TestCase):
 
 
 @pytest.mark.django_db
-class TestTasksWithMocking:
+class TestNotificationTasks:
     def test_send_email_success(self, mocker):
         args_dict = {"title": "a",
                      "text": "b",

@@ -122,8 +122,9 @@ def send_notification(event):
         notification_func = notification_funcs[notification_type]
         notification_sent = notification_func(args_dict)
         if notification_sent:
-            decrement_notifications_left(event)
-            return True
+            if not event.user.premium_member:
+                decrement_notifications_left(event)
+                return True
         else:
             if event.notification_retries_left > 0:
                 event.notification_retries_left -= 1

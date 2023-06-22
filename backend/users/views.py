@@ -67,6 +67,11 @@ class UserAPIView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+    def update(self, request, *args, **kwargs):
+        if not self.request.user.is_staff:
+            self.serializer_class = serializers.CustomUserUpdateSerializer
+        return super().update(request, *args, **kwargs)
+
 
 class UserSettingsAPIView(GenericAPIView):
     """Get, Update user settings"""

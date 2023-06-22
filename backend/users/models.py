@@ -17,8 +17,9 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(
         max_length=15, null=True, blank=True, validators=[phone_number_validator]
     )
-    email_notifications_left = models.IntegerField(default=settings.NO_OF_FREE_EMAIL_NOTIFICATIONS, editable=False)
-    sms_notifications_left = models.IntegerField(default=settings.NO_OF_FREE_SMS_NOTIFICATIONS, editable=False)
+    premium_member = models.BooleanField(default=False)
+    email_notifications_left = models.IntegerField(default=settings.NO_OF_FREE_EMAIL_NOTIFICATIONS)
+    sms_notifications_left = models.IntegerField(default=settings.NO_OF_FREE_SMS_NOTIFICATIONS)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
@@ -27,6 +28,11 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    def save(self, *args, **kwargs):
+        if self.is_staff:
+            self.premium_member = True
+        super(CustomUser, self).save(*args, **kwargs)
 
 
 class UserSettings(models.Model):

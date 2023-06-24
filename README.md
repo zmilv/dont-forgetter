@@ -1,5 +1,6 @@
 [![CI](https://github.com/zmilv/dont-forgetter/actions/workflows/ci.yml/badge.svg)](https://github.com/zmilv/dont-forgetter/actions/workflows/ci.yml)
 [![CD](https://github.com/zmilv/dont-forgetter/actions/workflows/cd.yml/badge.svg)](https://github.com/zmilv/dont-forgetter/actions/workflows/cd.yml)
+<div align="center"><img src="https://github.com/zmilv/dont-forgetter/assets/27917439/9dc5b3db-7fac-4c1c-9611-f9e956ff8352)" /></div>
 
 # dont-forgetter (WIP)
 

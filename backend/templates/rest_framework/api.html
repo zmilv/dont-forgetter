@@ -1,5 +1,3 @@
-{% load static %}
-
 {% extends "rest_framework/base.html" %}
 
 {% block title %}dont-forgetter{% endblock %}
@@ -15,11 +13,11 @@
 
 {% block style %}
 {{ block.super }}
-    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}" />
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png" />
 {% endblock %}
 
 {% block bootstrap_theme %}
-    <link rel="stylesheet" href="{% static 'bootstrap.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="/static/bootstrap.min.css" type="text/css">
 {% endblock %}
 
 {% block bootstrap_navbar_variant %}navbar-default{% endblock %}

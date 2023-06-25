@@ -356,7 +356,13 @@ class APIWelcomeView(GenericAPIView):
     def get(self, request):
         try:
             import json
-            welcome_message = "Welcome to dont-forgetter API! To get started, use the /user/register endpoint to create an account. If using the API via browser, you can log in using the button at top right. Otherwise, please use the /user/login endpoint to obtain a JWT token. Provide this token in the headers of your requests in order to access data requiring authentication. Documentation: https://dont-forgetter.rest/docs/ and https://github.com/zmilv/dont-forgetter"
+            welcome_message = "Welcome to dont-forgetter API! To get started, use the /user/register endpoint to " \
+                              "create an account. If using the API via browser, you can log in using the button at " \
+                              "top right. Otherwise, please use the /user/login endpoint to obtain a JWT token. " \
+                              "Provide this token in the headers of your requests in order to access data requiring " \
+                              "authentication. To create events and notes, visit /event and /note endpoints " \
+                              "respectively. Documentation: https://dont-forgetter.rest/docs/ and " \
+                              "https://github.com/zmilv/dont-forgetter"
             return Response({"welcome_message": welcome_message}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(

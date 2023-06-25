@@ -11,7 +11,9 @@ The application provides a RESTful API that allows users to create notes and set
 
 In addition, the API supports CRUD operations for notes, allowing users to create, retrieve, update, and delete notes as needed. The API also provides an endpoint to view upcoming reminders, as well as the ability to edit or delete them. The reminders and notes can be organized into types for easier management. Authentication is supported to ensure secure access to the user's data.
 
-This application can be useful for a variety of scenarios, such as personal to-do lists, project management, and team collaboration. With its flexible API, developers can easily integrate it into other applications or services. 
+This application can be useful for a variety of scenarios, such as personal to-do lists, project management, and team collaboration. With its flexible API, developers can easily integrate it into other applications or services.
+
+Currently the API allows 30 free monthly email notifications and 10 free monthly SMS notifications for all users, however feel free to reach out if you would like to have this limit lifted :)
 
 ---
 
@@ -19,19 +21,23 @@ This application can be useful for a variety of scenarios, such as personal to-d
 #### Authentication
 If using the API via browser, Django session authentication will be used.
 Otherwise, JWT bearer token needs to be provided in request headers.
-#### Account endpoints
-- POST register/ - register an account
-- POST login/ - log into an account and get a JWT
-- POST token/refresh/ - refresh a JWT
-- POST logout/ - log out of an account
+#### User endpoints
+- PATCH /user - edit user configuration
+- GET /user - get user details
+- POST /user/settings - edit user settings
+- GET /user/settings - get user settings
+- POST /user/register/ - register an account
+- POST /user/login/ - log into an account and get a JWT
+- POST /user/token/refresh/ - refresh a JWT
+- POST /user/logout/ - log out of an account
 #### Event endpoints
-- POST event/ - add an event
+- POST event/ - add or edit an event (if 'id' provided)
 - GET event/ - get details about the closest events
 - GET event/?query=\<query\> - get details about events matching the query
 - GET event/\<int:id\>/ - get details about a specific event
 - DELETE event/\<int:id\>/ - delete a specific event
 #### Note endpoints
-- POST note/ - add a note
+- POST note/ - add or edit a note (if 'id' provided)
 - GET note/ - get details about the latest notes
 - GET note/?query=\<query\> - get details about notes matching the query
 - GET note/\<int:id\>/ - get details about a specific note
@@ -87,7 +93,8 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 ---
 
 ### Future plans
-- React Native front-end
+- Account for daylight savings
 - Email and phone number verification
 - Encryption
 - More notification types
+- React Native front-end

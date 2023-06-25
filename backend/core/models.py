@@ -54,7 +54,9 @@ def apply_utc_offset(utc_offset, datetime_object, reverse=False):
 
 def get_utc_timestamp(local_date, local_time, utc_offset, notice_time):
     datetime_str = f"{local_date} {local_time}"
-    datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
+    datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").replace(
+        tzinfo=timezone.utc
+    )
     utc_datetime = apply_utc_offset(utc_offset, datetime_object)
     if notice_time != "-":
         utc_datetime -= timedelta(**parse_notice_time_or_interval(notice_time))
@@ -85,7 +87,9 @@ class Event(models.Model):
         max_length=10, default="", validators=[notification_type_validator]
     )
     utc_timestamp = models.IntegerField(editable=False)
-    notification_retries_left = models.IntegerField(default=settings.MAX_NOTIFICATION_RETRIES)
+    notification_retries_left = models.IntegerField(
+        default=settings.MAX_NOTIFICATION_RETRIES
+    )
 
     def save(self, *args, **kwargs):
         user_settings = UserSettings.objects.get(user=self.user)

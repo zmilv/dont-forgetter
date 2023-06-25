@@ -11,21 +11,24 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ("id",
-                  "username",
-                  "email",
-                  "phone_number",
-                  "email_notifications_left",
-                  "sms_notifications_left",
-                  "premium_member"
-                  )
+        fields = (
+            "id",
+            "username",
+            "email",
+            "phone_number",
+            "email_notifications_left",
+            "sms_notifications_left",
+            "premium_member",
+        )
 
 
 class CustomUserUpdateSerializer(serializers.ModelSerializer):
     class Meta(CustomUserSerializer.Meta):
-        read_only_fields = ("email_notifications_left",
-                            "sms_notifications_left",
-                            "premium_member")
+        read_only_fields = (
+            "email_notifications_left",
+            "sms_notifications_left",
+            "premium_member",
+        )
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):

@@ -4,10 +4,10 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 from celery import shared_task
-from django.core.mail import send_mail
 from django.conf import settings
+from django.core.mail import send_mail
 
-from core.models import Event, parse_notice_time_or_interval, apply_utc_offset
+from core.models import Event, apply_utc_offset, parse_notice_time_or_interval
 from users.models import CustomUser
 
 logger = logging.getLogger(__name__)
@@ -22,18 +22,22 @@ def decrement_notifications_left(event):
     notifications_left = getattr(event.user, f"{notification_type}_notifications_left")
     if notifications_left == 1:
         logger.info(f"Event {event} rejected due to notification limit")
-        notification_limit_message = f"Unfortunately you have no {notification_type} notifications left for this" \
-                                     f" month. Please contact {settings.CONTACT_EMAIL} if you would like to have this" \
-                                     f" limit lifted.{settings.MESSAGE_SIGNATURE}"
+        notification_limit_message = (
+            f"Unfortunately you have no {notification_type} notifications left for this"
+            f" month. Please contact {settings.CONTACT_EMAIL} if you would like to have this"
+            f" limit lifted.{settings.MESSAGE_SIGNATURE}"
+        )
         send_email_args_dict = {
             "title": f"{notification_type} notification limit reached".capitalize(),
             "text": notification_limit_message,
-            "email": event.user.email
+            "email": event.user.email,
         }
         send_email(send_email_args_dict)
         result = False
     notifications_left -= 1
-    setattr(event.user, f"{event.notification_type}_notifications_left", notifications_left)
+    setattr(
+        event.user, f"{event.notification_type}_notifications_left", notifications_left
+    )
     event.user.save()
     return result
 
@@ -134,7 +138,9 @@ def send_notification(event):
     return True
 
 
-def get_new_date_and_time(old_date, old_time, interval, utc_offset, current_utc_timestamp):
+def get_new_date_and_time(
+    old_date, old_time, interval, utc_offset, current_utc_timestamp
+):
     current_datetime = datetime.fromtimestamp(current_utc_timestamp, tz=timezone.utc)
     datetime_str = f"{old_date} {old_time}"
     datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").replace(
@@ -193,7 +199,9 @@ def heartbeat():
         result = []
         for event in expired_events:
             logger.info(f"{event} - Expired")
-            task_id = send_notification_and_reschedule_or_delete_event.delay(event.pk, current_utc_timestamp).id
+            task_id = send_notification_and_reschedule_or_delete_event.delay(
+                event.pk, current_utc_timestamp
+            ).id
             result.append(task_id)
         return result
     except Exception as e:
@@ -203,5 +211,7 @@ def heartbeat():
 
 @shared_task()
 def reset_notifications_left():
-    CustomUser.objects.all().update(email_notifications_left=settings.NO_OF_FREE_EMAIL_NOTIFICATIONS,
-                                    sms_notifications_left=settings.NO_OF_FREE_SMS_NOTIFICATIONS)
+    CustomUser.objects.all().update(
+        email_notifications_left=settings.NO_OF_FREE_EMAIL_NOTIFICATIONS,
+        sms_notifications_left=settings.NO_OF_FREE_SMS_NOTIFICATIONS,
+    )

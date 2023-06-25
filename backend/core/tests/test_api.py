@@ -1,5 +1,5 @@
-from django.contrib.auth.hashers import make_password
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -59,7 +59,10 @@ class GETTestSuite(APITestCase):
         self.url = "/event/?query="  # '/event?query=' gets redirected here
         for i in range(1, 3):  # 1 and 2
             Event.objects.create(
-                title=f"Title-{i}", date=f"2024-01-0{i}", notification_type="email", user=self.user
+                title=f"Title-{i}",
+                date=f"2024-01-0{i}",
+                notification_type="email",
+                user=self.user,
             )
         self.id1_dict = dict(
             [

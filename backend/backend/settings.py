@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+
 from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -117,7 +118,7 @@ STATIC_ROOT = "/static/"
 STATIC_URL = "/static/"
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 
@@ -172,8 +173,8 @@ CELERY_BEAT_SCHEDULE = {
     },
     "reset_notifications_left": {
         "task": "core.tasks.reset_notifications_left",
-        "schedule": crontab(0, 0, day_of_month='1')  # First day of every month
-    }
+        "schedule": crontab(0, 0, day_of_month="1"),  # First day of every month
+    },
 }
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")

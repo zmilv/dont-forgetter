@@ -10,6 +10,8 @@ services:
     expose:
       - 8000
     volumes:
+      - .:/usr/src/app
+      - logs:/usr/src/app/logs
       - static:/static
     env_file:
       - env_vars/.env.prod
@@ -43,4 +45,6 @@ services:
       - env_vars/.env.prod
 
 volumes:
+  logs: {}
+  postgres_data:
   static:

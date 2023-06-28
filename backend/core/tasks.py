@@ -56,7 +56,7 @@ def send_sms(args_dict):
         }
         response = session.post(url, data=params)
         logger.info(f"SMS response: {response.json()}")
-        if response.json()["messages"]["status"] == "0":
+        if response.json()["messages"][0]["status"] == "0":
             logger.info(f"SMS sent")
             return True
         else:

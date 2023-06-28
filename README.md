@@ -2,18 +2,27 @@
 [![CD](https://github.com/zmilv/dont-forgetter/actions/workflows/cd.yml/badge.svg)](https://github.com/zmilv/dont-forgetter/actions/workflows/cd.yml)
 <div align="center"><img src="https://github.com/zmilv/dont-forgetter/assets/27917439/9dc5b3db-7fac-4c1c-9611-f9e956ff8352)" /></div>
 
-# dont-forgetter (WIP)
+# dont-forgetter
 
 >Browsable API link: https://dont-forgetter.rest \
 >Swagger documentation: https://dont-forgetter.rest/docs/
 
-The application provides a RESTful API that allows users to create notes and set reminders for specific dates and times. Users can choose the type of notification they prefer, such as email, SMS or ~~Discord message~~ (coming soon) and the application will send the notification at the scheduled time. 
+The dont-forgetter API is a tool designed to help users schedule notifications and reminders for important events. Developed with the intention of preventing forgetfulness, this API allows me (and you!) to conveniently schedule notifications for birthdays, assignments or any other events that preferably would not be missed.
 
-In addition, the API supports CRUD operations for notes, allowing users to create, retrieve, update, and delete notes as needed. The API also provides an endpoint to view upcoming reminders, as well as the ability to edit or delete them. The reminders and notes can be organized into types for easier management. Authentication is supported to ensure secure access to the user's data.
+The API can be used to integrate reminder and note-taking functionalities into other applications. It can also be used as a standalone service via the browsable API link. By utilising the available endpoints, you can easily schedule, retrieve, and manage events and notes.
 
-This application can be useful for a variety of scenarios, such as personal to-do lists, project management, and team collaboration. With its flexible API, developers can easily integrate it into other applications or services.
+By default, all users receive 20 free email notifications and 10 free SMS notifications per month. However, please don't hesitate to reach out if you require a higher limit. :)
 
-Currently the API allows 30 free monthly email notifications and 10 free monthly SMS notifications for all users, however feel free to reach out if you would like to have this limit lifted :)
+Happy remembering!
+
+### Features
+- Schedule notifications or reminders to be sent at a chosen date and time.
+- Support for periodic events, ensuring recurring reminders are never missed.
+- Currently available notification types: email and SMS.
+- Store and manage notes to keep track of important information.
+- Query events and notes using GET requests with various operators (equal, and, or, not, greater_than, less_than).
+- Edit or delete existing notes and events.
+- Categorize notes and events for better organization.
 
 ---
 
@@ -22,7 +31,7 @@ Currently the API allows 30 free monthly email notifications and 10 free monthly
 If using the API via browser, Django session authentication will be used.
 Otherwise, JWT bearer token needs to be provided in request headers.
 #### User endpoints
-- PATCH /user - edit user configuration
+- PATCH /user - edit user details
 - GET /user - get user details
 - POST /user/settings - edit user settings
 - GET /user/settings - get user settings
@@ -62,8 +71,8 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 | title             | string (required)   |                     |
 | date              | string (required)   | "2023-05-15"        |
 | time              | string              | "14:00"             |
-| notice_time       | string              | "15min", "1d"       |
-| interval          | string              | "15min", "1d"       |
+| notice_time       | string              | "15min", "2h", 1d"  |
+| interval          | string              | "15min", "2h", 1d"  |
 | info              | string              |                     |
 | utc_offset        | string              | "+2", "+0", "-3:30" |
 
@@ -77,12 +86,27 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 | created_at | string (read-only)  | "2023-05-15 14:00" |
 | updated_at | string (read-only)  | "2023-05-15 14:00" |
 
+### User fields
+| Field        | Type              | Examples          |
+|--------------|-------------------|-------------------|
+| username     | string (required) |                   |
+| e-mail       | string (required) | "name@email.com"  |
+| phone_number | string            | "37069935951"     |
+
+### User Settings fields
+| Field                     | Type   | Examples            |
+|---------------------------|--------|---------------------|
+| default_notification_type | string | "email", "sms"      |
+| default_time              | string | "14:00"             |
+| default_utc_offset        | string | "+2", "+0", "-3:30" |
+
+
 ---
 
 ### Local set-up
 1. ```git clone```
 2. Create .env.dev out of .env.template
-3. Enter your SMTP e-mail credentials into .env.dev
+3. Enter your notification API credentials into .env.dev
 4. Get the docker image running ```docker-compose up --build```
 
 ---
@@ -93,7 +117,7 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 ---
 
 ### Future plans
-- Account for daylight savings
+- Account for daylight savings (by location)
 - Email and phone number verification
 - Encryption
 - More notification types

@@ -16,7 +16,7 @@ from core.validators import (
 from users.models import UserSettings
 
 
-def get_utc_offset(local_date):  # Unused. Todo: derive from user location setting
+def get_utc_offset(local_date):  # Deprecated. Todo: derive from user location setting
     datetime_object = datetime.strptime(local_date, "%Y-%m-%d")
     local_timezone = datetime_object.astimezone()
     offset = local_timezone.utcoffset() // timedelta(minutes=1) / 60

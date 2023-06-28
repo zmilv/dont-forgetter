@@ -24,140 +24,6 @@ from core.tasks import (
 from users.models import CustomUser
 
 
-class TestTasks(TestCase):
-    """Test suite for Celery tasks"""
-
-    def setUp(self):
-        self.current_datetime = datetime(
-            2020, 1, 1, 10, 5, tzinfo=timezone.utc
-        )  # 2020-01-01 10:05
-        self.current_timestamp = int(self.current_datetime.timestamp())
-        self.user = CustomUser.objects.create_user(
-            email="email@email.com", username="name", password=make_password("password")
-        )
-
-    def test_get_new_date_and_time(self):
-        result = get_new_date_and_time(
-            "2020-01-01", "10:00", "30min", "+0", self.current_timestamp
-        )
-        expected_result = ("2020-01-01", "10:30")
-        self.assertEqual(result, expected_result)
-
-    def test_reschedule_or_delete_event_without_interval(self):
-        event = Event.objects.create(
-            title=f"Title-1",
-            date="2020-01-01",
-            time="10:00",
-            utc_offset="+0",
-            user=self.user,
-        )
-        self.assertEqual(Event.objects.count(), 1)
-        reschedule_or_delete_event(
-            event, self.current_timestamp
-        )  # Event should be deleted
-        self.assertEqual(Event.objects.count(), 0)
-
-    def test_reschedule_or_delete_event_with_interval(self):
-        event = Event.objects.create(
-            title=f"Title-1",
-            date="2020-01-01",
-            time="10:00",
-            interval="30min",
-            utc_offset="+0",
-            user=self.user,
-        )
-        reschedule_or_delete_event(
-            event, self.current_timestamp
-        )  # Event should be updated
-        self.assertEqual(Event.objects.count(), 1)
-        self.assertEqual(Event.objects.get().title, "Title-1")
-        self.assertEqual(Event.objects.get().date, "2020-01-01")
-        self.assertEqual(Event.objects.get().time, "10:30")
-
-    def test_reschedule_or_delete_event_with_interval_missed_timestamp(self):
-        event = Event.objects.create(
-            title=f"Title-1",
-            date="2019-01-01",
-            time="10:00",
-            interval="30min",
-            utc_offset="+0",
-            user=self.user,
-        )
-        reschedule_or_delete_event(
-            event, self.current_timestamp
-        )  # Event should be updated
-        self.assertEqual(Event.objects.count(), 1)
-        self.assertEqual(Event.objects.get().title, "Title-1")
-        self.assertEqual(Event.objects.get().date, "2020-01-01")
-        self.assertEqual(Event.objects.get().time, "10:30")
-
-    def test_reset_notifications_left(self):
-        CustomUser.objects.create_user(
-            email="reset@email.com",
-            username="reset",
-            password=make_password("password"),
-            email_notifications_left=0,
-            sms_notifications_left=0,
-        )
-        self.assertEqual(
-            CustomUser.objects.get(username="reset").email_notifications_left, 0
-        )
-        self.assertEqual(
-            CustomUser.objects.get(username="reset").sms_notifications_left, 0
-        )
-        reset_notifications_left()
-        self.assertEqual(
-            CustomUser.objects.get(username="reset").email_notifications_left,
-            settings.NO_OF_FREE_EMAIL_NOTIFICATIONS,
-        )
-        self.assertEqual(
-            CustomUser.objects.get(username="reset").sms_notifications_left,
-            settings.NO_OF_FREE_SMS_NOTIFICATIONS,
-        )
-
-    def test_decrement_notifications_left(self):
-        user = CustomUser.objects.create_user(
-            email="decrement@email.com",
-            username="decrement",
-            password=make_password("password"),
-            email_notifications_left=10,
-        )
-        event = Event.objects.create(
-            title=f"Title-1",
-            date="2020-01-01",
-            time="10:00",
-            utc_offset="+0",
-            user=user,
-            notification_type="email",
-        )
-        result = decrement_notifications_left(event)
-        self.assertEqual(result, True)
-        self.assertEqual(
-            CustomUser.objects.get(username="decrement").email_notifications_left, 9
-        )
-
-    def test_decrement_notifications_left_on_last_notification(self):
-        user = CustomUser.objects.create_user(
-            email="decrement2@email.com",
-            username="decrement2",
-            password=make_password("password"),
-            email_notifications_left=1,
-        )
-        event = Event.objects.create(
-            title=f"Title-1",
-            date="2020-01-01",
-            time="10:00",
-            utc_offset="+0",
-            user=user,
-            notification_type="email",
-        )
-        result = decrement_notifications_left(event)
-        self.assertEqual(result, False)
-        self.assertEqual(
-            CustomUser.objects.get(username="decrement2").email_notifications_left, 0
-        )
-
-
 @pytest.mark.django_db
 class TestNotificationTasks:
     def test_send_email_success(self, mocker):
@@ -367,6 +233,140 @@ class TestNotificationTasks:
         mocked_send_email_func.assert_called_once()
         mocked_decrement_func.assert_not_called()
         assert event.notification_retries_left == 0
+
+
+class TestTasks(TestCase):
+    """Test suite for Celery tasks"""
+
+    def setUp(self):
+        self.current_datetime = datetime(
+            2020, 1, 1, 10, 5, tzinfo=timezone.utc
+        )  # 2020-01-01 10:05
+        self.current_timestamp = int(self.current_datetime.timestamp())
+        self.user = CustomUser.objects.create_user(
+            email="email@email.com", username="name", password=make_password("password")
+        )
+
+    def test_get_new_date_and_time(self):
+        result = get_new_date_and_time(
+            "2020-01-01", "10:00", "30min", "+0", self.current_timestamp
+        )
+        expected_result = ("2020-01-01", "10:30")
+        self.assertEqual(result, expected_result)
+
+    def test_reschedule_or_delete_event_without_interval(self):
+        event = Event.objects.create(
+            title=f"Title-1",
+            date="2020-01-01",
+            time="10:00",
+            utc_offset="+0",
+            user=self.user,
+        )
+        self.assertEqual(Event.objects.count(), 1)
+        reschedule_or_delete_event(
+            event, self.current_timestamp
+        )  # Event should be deleted
+        self.assertEqual(Event.objects.count(), 0)
+
+    def test_reschedule_or_delete_event_with_interval(self):
+        event = Event.objects.create(
+            title=f"Title-1",
+            date="2020-01-01",
+            time="10:00",
+            interval="30min",
+            utc_offset="+0",
+            user=self.user,
+        )
+        reschedule_or_delete_event(
+            event, self.current_timestamp
+        )  # Event should be updated
+        self.assertEqual(Event.objects.count(), 1)
+        self.assertEqual(Event.objects.get().title, "Title-1")
+        self.assertEqual(Event.objects.get().date, "2020-01-01")
+        self.assertEqual(Event.objects.get().time, "10:30")
+
+    def test_reschedule_or_delete_event_with_interval_missed_timestamp(self):
+        event = Event.objects.create(
+            title=f"Title-1",
+            date="2019-01-01",
+            time="10:00",
+            interval="30min",
+            utc_offset="+0",
+            user=self.user,
+        )
+        reschedule_or_delete_event(
+            event, self.current_timestamp
+        )  # Event should be updated
+        self.assertEqual(Event.objects.count(), 1)
+        self.assertEqual(Event.objects.get().title, "Title-1")
+        self.assertEqual(Event.objects.get().date, "2020-01-01")
+        self.assertEqual(Event.objects.get().time, "10:30")
+
+    def test_reset_notifications_left(self):
+        CustomUser.objects.create_user(
+            email="reset@email.com",
+            username="reset",
+            password=make_password("password"),
+            email_notifications_left=0,
+            sms_notifications_left=0,
+        )
+        self.assertEqual(
+            CustomUser.objects.get(username="reset").email_notifications_left, 0
+        )
+        self.assertEqual(
+            CustomUser.objects.get(username="reset").sms_notifications_left, 0
+        )
+        reset_notifications_left()
+        self.assertEqual(
+            CustomUser.objects.get(username="reset").email_notifications_left,
+            settings.NO_OF_FREE_EMAIL_NOTIFICATIONS,
+        )
+        self.assertEqual(
+            CustomUser.objects.get(username="reset").sms_notifications_left,
+            settings.NO_OF_FREE_SMS_NOTIFICATIONS,
+        )
+
+    def test_decrement_notifications_left(self):
+        user = CustomUser.objects.create_user(
+            email="decrement@email.com",
+            username="decrement",
+            password=make_password("password"),
+            email_notifications_left=10,
+        )
+        event = Event.objects.create(
+            title=f"Title-1",
+            date="2020-01-01",
+            time="10:00",
+            utc_offset="+0",
+            user=user,
+            notification_type="email",
+        )
+        result = decrement_notifications_left(event)
+        self.assertEqual(result, True)
+        self.assertEqual(
+            CustomUser.objects.get(username="decrement").email_notifications_left, 9
+        )
+
+    def test_decrement_notifications_left_on_last_notification(self):
+        user = CustomUser.objects.create_user(
+            email="decrement2@email.com",
+            username="decrement2",
+            password=make_password("password"),
+            email_notifications_left=1,
+        )
+        event = Event.objects.create(
+            title=f"Title-1",
+            date="2020-01-01",
+            time="10:00",
+            utc_offset="+0",
+            user=user,
+            notification_type="email",
+        )
+        result = decrement_notifications_left(event)
+        self.assertEqual(result, False)
+        self.assertEqual(
+            CustomUser.objects.get(username="decrement2").email_notifications_left, 0
+        )
 
 
 @freeze_time("2020-01-01 10:05")  # Mocks current datetime

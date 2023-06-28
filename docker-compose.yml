@@ -2,8 +2,6 @@ version: "3.8"
 
 services:
   django-migrations:
-    profiles:
-      - ci
     build: .
     container_name: django-migrations
     working_dir: /usr/src/app/backend
@@ -34,6 +32,7 @@ services:
     env_file:
       - env_vars/.env.dev
     depends_on:
+      - django-migrations
       - redis
       - pgdb
 

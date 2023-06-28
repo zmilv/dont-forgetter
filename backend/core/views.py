@@ -5,8 +5,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework import status
-from rest_framework.generics import GenericAPIView
+from rest_framework import status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -110,9 +109,6 @@ ownership_error_message = "You are not the owner of this object"
 
 
 def apply_swagger_schema(swagger_kwargs):
-    """Decorator for overriding the automatically generated swagger schema for children of the APIView abstract class
-    in order to include extra details"""
-
     def decorator(cls):
         class DecoratedClass(cls):
             @swagger_auto_schema(**swagger_kwargs)
@@ -124,7 +120,7 @@ def apply_swagger_schema(swagger_kwargs):
     return decorator
 
 
-class APIView(GenericAPIView, metaclass=ABCMeta):
+class APIView(views.APIView, metaclass=ABCMeta):
     """An abstract class for building API views for different models"""
 
     @property
@@ -198,17 +194,17 @@ class APIView(GenericAPIView, metaclass=ABCMeta):
             query = self.request.query_params.get("query", "")
             if not query:
                 # Get all entries if no query provided
-                self.queryset = (
+                queryset = (
                     self.model.objects.all()
                     .filter(user=user)
                     .order_by(self.order_by)[:QUERY_LIMIT]
                 )
             else:
-                self.queryset = APIQueryFuncs.get_queryset(
+                queryset = APIQueryFuncs.get_queryset(
                     *APIQueryFuncs.parse_query(query),
                     queryset=self.model.objects.all().filter(user=user),
                 ).order_by(self.order_by)[:QUERY_LIMIT]
-            serializer = self.serializer_class(self.queryset, many=True)
+            serializer = self.serializer_class(queryset, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
@@ -217,7 +213,7 @@ class APIView(GenericAPIView, metaclass=ABCMeta):
             )
 
 
-class APIDetailView(GenericAPIView, metaclass=ABCMeta):
+class APIDetailView(views.APIView, metaclass=ABCMeta):
     """An abstract class for building detail API views for different models"""
 
     @property
@@ -350,29 +346,3 @@ class NoteAPIDetailView(APIDetailView):
 
     model = Note
     serializer_class = NoteSerializer
-
-
-class APIWelcomeView(GenericAPIView):
-    """A class for the welcome endpoint"""
-
-    def get(self, request):
-        try:
-            import json
-
-            welcome_message = (
-                "Welcome to dont-forgetter API! To get started, use the /user/register endpoint to "
-                "create an account. If using the API via browser, you can log in using the button at "
-                "top right. Otherwise, please use the /user/login endpoint to obtain a JWT token. "
-                "Provide this token in the headers of your requests in order to access data requiring "
-                "authentication. To create events and notes, visit /event and /note endpoints "
-                "respectively. Documentation: https://dont-forgetter.rest/docs/ and "
-                "https://github.com/zmilv/dont-forgetter"
-            )
-            return Response(
-                {"welcome_message": welcome_message}, status=status.HTTP_200_OK
-            )
-        except Exception as e:
-            return Response(
-                {"result": "error", "message": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )

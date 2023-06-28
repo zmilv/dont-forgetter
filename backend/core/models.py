@@ -16,7 +16,7 @@ from core.validators import (
 from users.models import UserSettings
 
 
-def get_utc_offset(local_date):  # Deprecated. Todo: derive from user location setting
+def get_utc_offset(local_date):  # Unused. Todo: derive from user location setting
     datetime_object = datetime.strptime(local_date, "%Y-%m-%d")
     local_timezone = datetime_object.astimezone()
     offset = local_timezone.utcoffset() // timedelta(minutes=1) / 60
@@ -37,10 +37,8 @@ def parse_notice_time_or_interval(value):
     return {units: int(number)}
 
 
-def apply_utc_offset(utc_offset, datetime_object, reverse=False):
+def apply_utc_offset(utc_offset, datetime_object):
     plus_or_minus = -1 if utc_offset[0] == "+" else 1
-    if reverse:
-        plus_or_minus *= -1
     offset_split = [int(x) for x in utc_offset[1:].split(":")]
     offset_h = offset_split[0]
     offset_min = 0
@@ -49,14 +47,12 @@ def apply_utc_offset(utc_offset, datetime_object, reverse=False):
     utc_datetime = datetime_object + plus_or_minus * timedelta(
         hours=offset_h, minutes=offset_min
     )
-    return utc_datetime
+    return utc_datetime.replace(tzinfo=timezone.utc)
 
 
 def get_utc_timestamp(local_date, local_time, utc_offset, notice_time):
     datetime_str = f"{local_date} {local_time}"
-    datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").replace(
-        tzinfo=timezone.utc
-    )
+    datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
     utc_datetime = apply_utc_offset(utc_offset, datetime_object)
     if notice_time != "-":
         utc_datetime -= timedelta(**parse_notice_time_or_interval(notice_time))
@@ -87,9 +83,6 @@ class Event(models.Model):
         max_length=10, default="", validators=[notification_type_validator]
     )
     utc_timestamp = models.IntegerField(editable=False)
-    notification_retries_left = models.IntegerField(
-        default=settings.MAX_NOTIFICATION_RETRIES
-    )
 
     def save(self, *args, **kwargs):
         user_settings = UserSettings.objects.get(user=self.user)
@@ -100,7 +93,7 @@ class Event(models.Model):
         if not self.notification_type:
             self.notification_type = user_settings.default_notification_type
         if self.notification_type == "sms":
-            if not self.user.phone_number:
+            if not user_settings.phone_number:
                 raise serializers.ValidationError(
                     "Phone number needs to be entered in settings in order to use the SMS notification type."
                 )
@@ -130,7 +123,7 @@ class Note(models.Model):
             self.title = (
                 str(self.info)[:50] + "..."
                 if len(str(self.info)) > 50
-                else str(self.info)
+                else str(self.info)[:50]
             )
         super(Note, self).save(*args, **kwargs)
 

@@ -1,28 +1,16 @@
 [![CI](https://github.com/zmilv/dont-forgetter/actions/workflows/ci.yml/badge.svg)](https://github.com/zmilv/dont-forgetter/actions/workflows/ci.yml)
 [![CD](https://github.com/zmilv/dont-forgetter/actions/workflows/cd.yml/badge.svg)](https://github.com/zmilv/dont-forgetter/actions/workflows/cd.yml)
-<div align="center"><img src="https://github.com/zmilv/dont-forgetter/assets/27917439/9dc5b3db-7fac-4c1c-9611-f9e956ff8352)" /></div>
 
-# dont-forgetter
+# dont-forgetter (WIP)
 
 >Browsable API link: https://dont-forgetter.rest \
 >Swagger documentation: https://dont-forgetter.rest/docs/
 
-The dont-forgetter API is a tool designed to help users schedule notifications and reminders for important events. Developed with the intention of preventing forgetfulness, this API allows me (and you!) to conveniently schedule notifications for birthdays, assignments or any other events that preferably would not be missed.
+The application provides a RESTful API that allows users to create notes and set reminders for specific dates and times. Users can choose the type of notification they prefer, such as email, ~~SMS, Discord message, or push notification~~ (coming soon) and the application will send the notification at the scheduled time. 
 
-The API can be used to integrate reminder and note-taking functionalities into other applications. It can also be used as a standalone service via the browsable API link. By utilising the available endpoints, you can easily schedule, retrieve, and manage events and notes.
+In addition, the API supports CRUD operations for notes, allowing users to create, retrieve, update, and delete notes as needed. The API also provides an endpoint to view upcoming reminders, as well as the ability to edit or delete them. The reminders and notes can be organized into types for easier management. Authentication is supported to ensure secure access to the user's data.
 
-By default, all users receive 20 free email notifications and 10 free SMS notifications per month. However, please don't hesitate to reach out if you require a higher limit. :)
-
-Happy remembering!
-
-### Features
-- Schedule notifications or reminders to be sent at a chosen date and time.
-- Support for periodic events, ensuring recurring reminders are never missed.
-- Currently available notification types: email and SMS.
-- Store and manage notes to keep track of important information.
-- Query events and notes using GET requests with various operators (equal, and, or, not, greater_than, less_than).
-- Edit or delete existing notes and events.
-- Categorize notes and events for better organization.
+This application can be useful for a variety of scenarios, such as personal to-do lists, project management, and team collaboration. With its flexible API, developers can easily integrate it into other applications or services. 
 
 ---
 
@@ -30,23 +18,19 @@ Happy remembering!
 #### Authentication
 If using the API via browser, Django session authentication will be used.
 Otherwise, JWT bearer token needs to be provided in request headers.
-#### User endpoints
-- PATCH /user - edit user details
-- GET /user - get user details
-- POST /user/settings - edit user settings
-- GET /user/settings - get user settings
-- POST /user/register/ - register an account
-- POST /user/login/ - log into an account and get a JWT
-- POST /user/token/refresh/ - refresh a JWT
-- POST /user/logout/ - log out of an account
+#### Account endpoints
+- POST register/ - register an account
+- POST login/ - log into an account and get a JWT
+- POST token/refresh/ - refresh a JWT
+- POST logout/ - log out of an account
 #### Event endpoints
-- POST event/ - add or edit an event (if 'id' provided)
+- POST event/ - add an event
 - GET event/ - get details about the closest events
 - GET event/?query=\<query\> - get details about events matching the query
 - GET event/\<int:id\>/ - get details about a specific event
 - DELETE event/\<int:id\>/ - delete a specific event
 #### Note endpoints
-- POST note/ - add or edit a note (if 'id' provided)
+- POST note/ - add a note
 - GET note/ - get details about the latest notes
 - GET note/?query=\<query\> - get details about notes matching the query
 - GET note/\<int:id\>/ - get details about a specific note
@@ -65,48 +49,33 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 ### Event fields
 | Field             | Type                | Examples            |
 |-------------------|---------------------|---------------------|
-| id                | integer (read-only) |                     |
+| id                | integer (automatic) |                     |
 | notification_type | string              | "email", "sms"      |
 | category          | string              | "birthday", "uni"   |
 | title             | string (required)   |                     |
 | date              | string (required)   | "2023-05-15"        |
 | time              | string              | "14:00"             |
-| notice_time       | string              | "15min", "2h", 1d"  |
-| interval          | string              | "15min", "2h", 1d"  |
+| notice_time       | string              | "15min", "1d"       |
+| interval          | string              | "15min", "1d"       |
 | info              | string              |                     |
 | utc_offset        | string              | "+2", "+0", "-3:30" |
 
 ### Note fields
 | Field      | Type                | Examples           |
 |------------|---------------------|--------------------|
-| id         | integer (read-only) |                    |
+| id         | integer (automatic) |                    |
 | category   | string              |                    |
 | title      | string (required)   |                    |
 | info       | string (required)   |                    |
-| created_at | string (read-only)  | "2023-05-15 14:00" |
-| updated_at | string (read-only)  | "2023-05-15 14:00" |
-
-### User fields
-| Field        | Type              | Examples          |
-|--------------|-------------------|-------------------|
-| username     | string (required) |                   |
-| e-mail       | string (required) | "name@email.com"  |
-| phone_number | string            | "37069935951"     |
-
-### User Settings fields
-| Field                     | Type   | Examples            |
-|---------------------------|--------|---------------------|
-| default_notification_type | string | "email", "sms"      |
-| default_time              | string | "14:00"             |
-| default_utc_offset        | string | "+2", "+0", "-3:30" |
-
+| created_at | string (automatic)  | "2023-05-15 14:00" |
+| updated_at | string (automatic)  | "2023-05-15 14:00" |
 
 ---
 
 ### Local set-up
 1. ```git clone```
 2. Create .env.dev out of .env.template
-3. Enter your notification API credentials into .env.dev
+3. Enter your SMTP e-mail credentials into .env.dev
 4. Get the docker image running ```docker-compose up --build```
 
 ---
@@ -117,8 +86,5 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 ---
 
 ### Future plans
-- Account for daylight savings (by location)
-- Email and phone number verification
-- Encryption
-- More notification types
 - React Native front-end
+- More notification types

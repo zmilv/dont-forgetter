@@ -1,10 +1,13 @@
 from django.contrib.auth import get_user_model
-from rest_framework import status
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status, views
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from core.validators import regex_dict
 from users import serializers
 
 User = get_user_model()
@@ -67,18 +70,38 @@ class UserAPIView(RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
-    def update(self, request, *args, **kwargs):
-        if not self.request.user.is_staff:
-            self.serializer_class = serializers.CustomUserUpdateSerializer
-        return super().update(request, *args, **kwargs)
 
-
-class UserSettingsAPIView(GenericAPIView):
+class UserSettingsAPIView(views.APIView):
     """Get, Update user settings"""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = serializers.UserSettingsSerializer
 
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                "phone_number": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    pattern=regex_dict["phone_number"],
+                    x_nullable=True,
+                ),
+                "default_notification_type": openapi.Schema(
+                    type=openapi.TYPE_STRING, default="email", enum=["email", "sms"]
+                ),
+                "default_time": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default="10:00",
+                    pattern=regex_dict["time"],
+                ),
+                "default_utc_offset": openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    default="+0",
+                    pattern=regex_dict["utc_offset"],
+                ),
+            },
+        )
+    )
     def post(self, request):
         try:
             settings_object = request.user.usersettings

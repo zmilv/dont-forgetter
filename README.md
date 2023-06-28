@@ -11,7 +11,7 @@ The dont-forgetter API is a tool designed to help users schedule notifications a
 
 The API can be used to integrate reminder and note-taking functionalities into other applications. It can also be used as a standalone service via the browsable API link. By utilising the available endpoints, you can easily schedule, retrieve, and manage events and notes.
 
-By default, all users receive 20 free email notifications and 10 free SMS notifications per month. However, please don't hesitate to reach out if you require a higher limit. :)
+Please check you spam folder if email notifications are not immediately visible. By default, all users receive 20 free email notifications and 10 free SMS notifications per month. However, please don't hesitate to reach out if you require a higher limit. :)
 
 Happy remembering!
 
@@ -112,7 +112,8 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 ---
 
 ### Current architecture
-![df-architecture](https://github.com/zmilv/dont-forgetter/assets/27917439/ba7a3a3f-610c-47c5-8fc0-75028043c5ef)
+![df-architecture](https://github.com/zmilv/dont-forgetter/assets/27917439/eeba933b-94df-4d70-ae53-7ba8d10d5ea2)
+
 
 ---
 

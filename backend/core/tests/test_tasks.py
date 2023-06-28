@@ -72,7 +72,7 @@ class TestNotificationTasks:
         class MockResponse:
             @staticmethod
             def json():
-                return {"messages": {"status": "0"}}
+                return {"messages": [{"status": "0"}]}
 
         mocked_func = mocker.patch(
             "core.tasks.requests.Session.post", return_value=MockResponse
@@ -100,7 +100,7 @@ class TestNotificationTasks:
         class MockResponse:
             @staticmethod
             def json():
-                return {"messages": {"status": "1"}}
+                return {"messages": [{"status": "1"}]}
 
         mocked_func = mocker.patch(
             "core.tasks.requests.Session.post", return_value=MockResponse

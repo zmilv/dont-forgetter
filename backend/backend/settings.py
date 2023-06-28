@@ -2,6 +2,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -115,6 +117,11 @@ DATETIME_FORMAT = "Y-m-d H:i"
 STATIC_ROOT = "/static/"
 STATIC_URL = "/static/"
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -162,8 +169,12 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULE = {
     "heartbeat": {
         "task": "core.tasks.heartbeat",
-        "schedule": 20.0,
-    }
+        "schedule": 20.0,  # Every 20 seconds
+    },
+    "reset_notifications_left": {
+        "task": "core.tasks.reset_notifications_left",
+        "schedule": crontab(0, 0, day_of_month="1"),  # First day of every month
+    },
 }
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
@@ -215,3 +226,15 @@ SIMPLE_JWT = {
 }
 
 CSRF_TRUSTED_ORIGINS = ["https://*.dont-forgetter.rest", "https://*.127.0.0.1"]
+
+
+# dont-forgetter
+
+DEFAULT_NOTIFICATION_TYPE = "email"
+DEFAULT_TIME = "10:00"
+DEFAULT_UTC_OFFSET = "+3"
+NO_OF_FREE_EMAIL_NOTIFICATIONS = 20
+NO_OF_FREE_SMS_NOTIFICATIONS = 10
+MAX_NOTIFICATION_RETRIES = 3
+MESSAGE_SIGNATURE = "\n\n\ndont-forgetter.rest"
+CONTACT_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")

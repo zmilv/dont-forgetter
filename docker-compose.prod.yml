@@ -1,25 +1,16 @@
 version: "3.8"
 
 services:
-  django-migrations:
-    image: "${DJANGO_MIGRATIONS_IMAGE}"
-    command: >
-      sh -c "python manage.py makemigrations core &&
-             python manage.py makemigrations users &&
-             python manage.py migrate &&
-             python manage.py collectstatic --noinput"
-    volumes:
-      - static:/static
-    env_file:
-      - env_vars/.env.prod
-
   django:
     image: "${DJANGO_IMAGE}"
     restart: always
     command: >
-      sh -c "gunicorn backend.wsgi:application --bind 0.0.0.0:8000"
+      sh -c "python manage.py collectstatic --noinput &&
+             gunicorn backend.wsgi:application --bind 0.0.0.0:8000"
     expose:
       - 8000
+    volumes:
+      - static:/static
     env_file:
       - env_vars/.env.prod
 

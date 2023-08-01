@@ -53,14 +53,14 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 - DELETE note/\<int:id\>/ - delete a specific note
 
 ### Queries
-| Operator     | Examples                                            |
-|--------------|-----------------------------------------------------|
-| equal        | equal(type,"birthday")                              |
-| and          | and(equal(type,"uni"),less_than(date,"2023-05-16")) |
-| or           | or(equal(type,"uni"),equal(type,"work"))            |
-| not          | not(equal(type,"uni"))                              |
-| greater_than | greater_than(date,"2023-06-01")                     |
-| less_than    | less_than(time,"17:00")                             |
+| Operator     | Examples                                                |
+|--------------|---------------------------------------------------------|
+| equal        | equal(category,"birthday")                              |
+| and          | and(equal(category,"uni"),less_than(date,"2023-05-16")) |
+| or           | or(equal(category,"uni"),equal(category,"work"))        |
+| not          | not(equal(category,"uni"))                              |
+| greater_than | greater_than(date,"2023-06-01")                         |
+| less_than    | less_than(time,"17:00")                                 |
 
 ### Event fields
 | Field             | Type                | Examples            |
@@ -107,7 +107,13 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 1. ```git clone```
 2. Create .env.dev out of .env.template
 3. Enter your notification API credentials into .env.dev
-4. Get the docker image running ```docker-compose up --build```
+4. Get the docker image running: ```docker-compose up -d```
+5. Create database migrations:
+   ```
+   docker-compose exec django python manage.py makemigrations core
+   docker-compose exec django python manage.py makemigrations user
+   docker-compose exec django python manage.py migrate
+   ```
 
 ---
 

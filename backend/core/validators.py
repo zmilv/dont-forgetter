@@ -58,8 +58,6 @@ def notification_type_validator(value):
 
 
 def phone_number_validator(value):
-    if value[0] == "+":
-        value = value[1:]
     regex = regex_dict["phone_number"]
     if not re.fullmatch(regex, value):
         raise serializers.ValidationError(

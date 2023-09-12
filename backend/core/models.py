@@ -79,7 +79,12 @@ class Event(models.Model):
     interval = models.CharField(
         max_length=15, default="-", validators=[interval_and_notice_validator]
     )
-    info = models.TextField(max_length=3000, null=True, blank=True)
+    info = models.TextField(max_length=1000, null=True, blank=True)
+
+    custom_email_title = models.CharField(max_length=100, null=True, blank=True)
+    custom_message = models.TextField(max_length=1000, null=True, blank=True)
+    custom_variables = models.CharField(max_length=700, null=True, blank=True)
+
     utc_offset = models.CharField(
         max_length=6, default="", validators=[utc_offset_validator]
     )

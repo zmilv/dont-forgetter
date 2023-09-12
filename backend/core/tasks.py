@@ -77,35 +77,75 @@ def send_email(args_dict):
     return False
 
 
-def build_notification_title_and_text(event):
-    category = event.category
-    title = event.title
-    date = event.date
-    time = event.time
-    notice_time = event.notice_time
-    interval = event.interval
-    info = event.info
-    utc_offset = event.utc_offset
+class NotificationContents:
+    def __init__(self, event):
+        self.event = event
+        if event.custom_variables:
+            self.variable_dict = self.parse_custom_message_variables()
 
-    notification_title = f"Time for {title}"
-    if category != "other":
-        notification_title += f" ({category})"
-    notification_title += "!"
+        self.email_title = self.get_email_title()
+        self.message = self.get_message()
 
-    notification_text = f"It is time for {title}"
-    if category != "other":
-        notification_text += f" ({category})"
-    if notice_time != "-":
-        notification_text += f" in {notice_time}"
-    notification_text += "."
-    notification_text += f"\n(Scheduled for {date} {time} UTC{utc_offset})"
-    if interval != "-":
-        notification_text += f"\nNext such event scheduled in {interval}."
-    if info:
-        notification_text += f"\nInfo: {info}"
-    notification_text += settings.MESSAGE_SIGNATURE
+    def parse_custom_message_variables(self):
+        """
+        Takes the custom_variables and returns a dictionary of the variables.
+        Example of custom_variables: 'name=Tom; surname=Smith'.
+        Example of output: {'name': 'Tom', 'surname': 'Smith'}.
+        """
+        variables_dict = {}
+        variables_list = self.event.custom_variables.split(";")
+        for variable in variables_list:
+            variable_split = variable.split("=")
+            variables_dict[variable_split[0].strip()] = variable_split[1]
+        return variables_dict
 
-    return notification_title, notification_text
+    def build_custom_text(self, template, variable_dict):
+        """
+        Takes the template and replaces the plugs the variables in.
+        Example of template: 'hi {{name}}, your last name is {{surname}}'.
+        Example of output: 'hi Tom, your last name is Smith'.
+        """
+        for key, value in variable_dict.items():
+            template = template.replace("{{" + key + "}}", value)
+        return template
+
+    def build_default_title(self):
+        notification_title = f"Time for {self.event.title}"
+        if self.event.category != "other":
+            notification_title += f" ({self.event.category})"
+        notification_title += "!"
+
+        return notification_title
+
+    def build_default_message(self):
+        notification_text = f"It is time for {self.event.title}"
+        if self.event.category != "other":
+            notification_text += f" ({self.event.category})"
+        if self.event.notice_time != "-":
+            notification_text += f" in {self.event.notice_time}"
+        notification_text += "."
+        notification_text += f"\n(Scheduled for {self.event.date} {self.event.time} UTC{self.event.utc_offset})"
+        if self.event.interval != "-":
+            notification_text += f"\nNext such event scheduled in {self.event.interval}."
+        if self.event.info:
+            notification_text += f"\nInfo: {self.event.info}"
+        notification_text += settings.MESSAGE_SIGNATURE
+
+        return notification_text
+
+    def get_message(self):
+        if not self.event.custom_message:
+            return self.build_default_message()
+        elif self.event.custom_variables:
+            return self.build_custom_text(self.event.custom_message, self.variable_dict)
+        return self.event.custom_message
+
+    def get_email_title(self):
+        if not self.event.custom_email_title:
+            return self.build_default_title()
+        elif self.event.custom_variables:
+            return self.build_custom_text(self.event.custom_email_title, self.variable_dict)
+        return self.event.custom_email_title
 
 
 notification_funcs = {"email": send_email, "sms": send_sms}
@@ -116,10 +156,10 @@ def send_notification(event):
     if getattr(event.user, f"{notification_type}_notifications_left") > 0:
         logger.info(f"{event} - Sending notification")
         logger.info(f"{event.date} {event.time}")
-        notification_title, notification_text = build_notification_title_and_text(event)
+        notification_contents = NotificationContents(event)
         args_dict = {
-            "title": notification_title,
-            "text": notification_text,
+            "title": notification_contents.email_title,
+            "text": notification_contents.message,
             "email": event.user.email,
             "phone_number": event.user.phone_number,
         }

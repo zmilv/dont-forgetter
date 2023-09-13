@@ -79,7 +79,7 @@ class EmailNotification(NotificationStrategy):
         self.email_title = self.get_email_title()
 
     def send_notification(self):
-        result = send_mail(self.email_title, self.message, None, self.event.recipient, fail_silently=False)
+        result = send_mail(self.email_title, self.message, None, [self.event.recipient], fail_silently=False)
         if result == 1:
             logger.info("E-mail sent")
             return True
@@ -144,6 +144,9 @@ class NotificationService:
 
             notification_sent = self.strategy.send_notification()
             if notification_sent:
+                if self.event.interval != "-" and self.event.count:
+                    self.event.count -= 1
+                    self.event.save()
                 if not self.event.user.premium_member:
                     self.decrement_notifications_left()
                     return True
@@ -188,7 +191,7 @@ class NotificationEvent:
         self.current_utc_timestamp = current_utc_timestamp
 
     def reschedule_or_delete_event(self):
-        if self.event.interval == "-":
+        if self.event.interval == "-" or self.event.count == 0:
             logger.info(f"{self.event} - Deleting")
             self.event.delete()
         else:

@@ -66,7 +66,13 @@ def phone_number_validator(value):
             " consist of 11 digits in total."
         )
 
+
 def email_validator(value):
     regex = regex_dict["email"]
     if not re.fullmatch(regex, value):
         raise serializers.ValidationError("Invalid email format.")
+
+
+def count_validator(value):
+    if value < 2:
+        raise serializers.ValidationError("Count must be at least 2 if an interval is set")

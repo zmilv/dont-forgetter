@@ -6,6 +6,7 @@ from django.db import models
 from rest_framework import serializers
 
 from core.validators import (
+    count_validator,
     date_validator,
     email_validator,
     interval_and_notice_validator,
@@ -83,6 +84,7 @@ class Event(models.Model):
     interval = models.CharField(
         max_length=15, default="-", validators=[interval_and_notice_validator]
     )
+    count = models.IntegerField(null=True, blank=True, validators=[count_validator])
 
     custom_email_subject = models.CharField(max_length=100, null=True, blank=True)
     custom_message = models.TextField(max_length=1000, null=True, blank=True)
@@ -107,7 +109,9 @@ class Event(models.Model):
             self.utc_offset = user_settings.default_utc_offset
         if not self.notification_type:
             self.notification_type = user_settings.default_notification_type
+
         self.validate_and_set_recipient()
+        self.validate_count()
 
         self.utc_timestamp = get_utc_timestamp(
             str(self.date), str(self.time), str(self.utc_offset), str(self.notice_time)
@@ -130,6 +134,10 @@ class Event(models.Model):
                 email_validator(self.recipient)
             else:
                 self.recipient = self.user.email
+
+    def validate_count(self):
+        if self.interval == "-" and self.count:
+            raise serializers.ValidationError("Count can only be set if an interval is also set")
 
     def __str__(self):
         return f"ID{self.pk}({self.user.pk})|{self.category} - {self.title}"

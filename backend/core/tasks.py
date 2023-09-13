@@ -78,11 +78,10 @@ class NotificationStrategy(ABC):
 class EmailNotification(NotificationStrategy):
     def __init__(self, event):
         super().__init__(event)
-        self.email_recipient = [self.event.user.email]
         self.email_title = self.get_email_title()
 
     def send_notification(self):
-        result = send_mail(self.email_title, self.message, None, self.email_recipient, fail_silently=False)
+        result = send_mail(self.email_title, self.message, None, self.event.recipient, fail_silently=False)
         if result == 1:
             logger.info("E-mail sent")
             return True
@@ -107,7 +106,6 @@ class EmailNotification(NotificationStrategy):
 class SMSNotification(NotificationStrategy):
     def __init__(self, event):
         super().__init__(event)
-        self.sms_recipient = self.event.user.phone_number
 
     def send_notification(self):
         with requests.Session() as session:
@@ -116,7 +114,7 @@ class SMSNotification(NotificationStrategy):
                 "api_key": vonage_api_key,
                 "api_secret": vonage_api_secret,
                 "from": "dont-forgetter",
-                "to": self.sms_recipient,
+                "to": self.event.recipient,
                 "text": self.message,
             }
             response = session.post(url, data=params)

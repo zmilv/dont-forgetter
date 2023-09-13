@@ -7,7 +7,8 @@ regex_dict = {
     "time": "^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$",  # hh:mm
     "interval_and_notice": "^\d+(y|m|d|h|min)$",
     "utc_offset": "^[+-]\d{1,2}:?\d{0,2}$",  # +/-h(:mm)
-    "phone_number": "370\d{8}",
+    "phone_number": "^370\d{8}$",
+    "email": "^[a-z0-9]+(?:[._][a-z0-9]+)*@(?:\w+\.)+\w{2,3}$"
 }
 
 units_translation_dict = {
@@ -64,3 +65,8 @@ def phone_number_validator(value):
             "Invalid phone number. Currently only Lithuanian numbers are accepted. Number has to start with 370 and"
             " consist of 11 digits in total."
         )
+
+def email_validator(value):
+    regex = regex_dict["email"]
+    if not re.fullmatch(regex, value):
+        raise serializers.ValidationError("Invalid email format.")

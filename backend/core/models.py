@@ -7,6 +7,7 @@ from rest_framework import serializers
 
 from core.validators import (
     count_validator,
+    custom_variables_validator,
     date_validator,
     email_validator,
     interval_and_notice_validator,
@@ -88,7 +89,7 @@ class Event(models.Model):
 
     custom_email_subject = models.CharField(max_length=100, null=True, blank=True)
     custom_message = models.TextField(max_length=1000, null=True, blank=True)
-    custom_variables = models.CharField(max_length=700, null=True, blank=True)
+    custom_variables = models.CharField(max_length=700, null=True, blank=True, validators=[custom_variables_validator])
 
     utc_offset = models.CharField(
         max_length=6, default="", validators=[utc_offset_validator]

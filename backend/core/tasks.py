@@ -68,8 +68,6 @@ class NotificationStrategy(ABC):
         notification_text += f"\n(Scheduled for {self.event.date} {self.event.time} UTC{self.event.utc_offset})"
         if self.event.interval != "-":
             notification_text += f"\nNext such event scheduled in {self.event.interval}."
-        if self.event.info:
-            notification_text += f"\nInfo: {self.event.info}"
         notification_text += settings.MESSAGE_SIGNATURE
 
         return notification_text

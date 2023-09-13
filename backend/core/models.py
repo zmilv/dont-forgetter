@@ -83,7 +83,6 @@ class Event(models.Model):
     interval = models.CharField(
         max_length=15, default="-", validators=[interval_and_notice_validator]
     )
-    info = models.TextField(max_length=1000, null=True, blank=True)
 
     custom_email_subject = models.CharField(max_length=100, null=True, blank=True)
     custom_message = models.TextField(max_length=1000, null=True, blank=True)

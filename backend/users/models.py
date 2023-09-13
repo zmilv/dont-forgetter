@@ -54,6 +54,7 @@ class UserSettings(models.Model):
         default=settings.DEFAULT_UTC_OFFSET,
         validators=[utc_offset_validator],
     )
+    sms_sender_name = models.CharField(max_length=11, default="dont-forget")
 
     def __str__(self):
         return self.user.email

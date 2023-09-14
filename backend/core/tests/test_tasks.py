@@ -193,7 +193,7 @@ class TestSMSNotification:
         return SMSNotification(mock_event)
 
     def test_send_sms_success(self, sms_notification, mocker):
-        sms_notification.event.user.sms_sender_name = "sender_name"
+        sms_notification.event.user.usersettings.sms_sender_name = "sender_name"
         sms_notification.event.recipient = "recipient"
         sms_notification.message = "message"
 
@@ -223,7 +223,7 @@ class TestSMSNotification:
         assert result == expected_result
 
     def test_send_sms_failed(self, sms_notification, mocker):
-        sms_notification.event.user.sms_sender_name = "sender_name"
+        sms_notification.event.user.usersettings.sms_sender_name = "sender_name"
         sms_notification.event.recipient = "recipient"
         sms_notification.message = "message"
 

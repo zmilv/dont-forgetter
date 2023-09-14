@@ -71,5 +71,5 @@ class UserSettingsSerializer(CustomUserSerializer):
             "default_notification_type",
             "default_time",
             "default_utc_offset",
-            "sms_sender_name"
+            "sms_sender_name",
         )

@@ -12,6 +12,7 @@ from core.models import (
     parse_notice_time_or_interval,
     time_validator,
     utc_offset_validator,
+    custom_variables_validator
 )
 
 
@@ -59,6 +60,22 @@ class TestModelValidators(TestCase):
     def test_utc_offset_validator_invalid(self):
         with self.assertRaises(ValidationError):
             utc_offset_validator("2")
+
+    def test_custom_variables_validator_valid(self):
+        try:
+            custom_variables_validator("name=Tom")
+        except ValidationError:
+            self.fail("custom_variables_validator raised ValidationError unexpectedly!")
+
+    def test_custom_variables_validator_valid_two_variables(self):
+        try:
+            custom_variables_validator("name=Tom; var2=variable2")
+        except ValidationError:
+            self.fail("custom_variables_validator raised ValidationError unexpectedly!")
+
+    def test_custom_variables_validator_invalid(self):
+        with self.assertRaises(ValidationError):
+            custom_variables_validator("name-Tom")
 
 
 class TestModelHelperFuncs(TestCase):

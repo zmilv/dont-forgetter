@@ -19,6 +19,7 @@ Happy remembering!
 - Schedule notifications or reminders to be sent at a chosen date and time.
 - Support for periodic events, ensuring recurring reminders are never missed.
 - Currently available notification types: email and SMS.
+- Support for template messages with variables in notifications
 - Store and manage notes to keep track of important information.
 - Query events and notes using GET requests with various operators (equal, and, or, not, greater_than, less_than).
 - Edit or delete existing notes and events.
@@ -63,18 +64,34 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 | less_than    | less_than(time,"17:00")                                 |
 
 ### Event fields
-| Field             | Type                | Examples            |
-|-------------------|---------------------|---------------------|
-| id                | integer (read-only) |                     |
-| notification_type | string              | "email", "sms"      |
-| category          | string              | "birthday", "uni"   |
-| title             | string (required)   |                     |
-| date              | string (required)   | "2023-05-15"        |
-| time              | string              | "14:00"             |
-| notice_time       | string              | "15min", "2h", 1d"  |
-| interval          | string              | "15min", "2h", 1d"  |
-| info              | string              |                     |
-| utc_offset        | string              | "+2", "+0", "-3:30" |
+| Field                | Type                | Examples                                   |
+|----------------------|---------------------|--------------------------------------------|
+| id                   | integer (read-only) |                                            |
+| notification_type    | string              | "email", "sms"                             |
+| recipient            | string              | "name@email.com", "37069935951"            |
+| category             | string              | "birthday", "uni"                          |
+| title                | string (required)   |                                            |
+| date                 | string (required)   | "2023-05-15"                               |
+| time                 | string              | "14:00"                                    |
+| notice_time          | string              | "15min", "2h", 1d"                         |
+| interval             | string              | "15min", "2h", 1d"                         |
+| count                | integer             | 5                                          |
+| custom_email_subject | string              | "Hi {{name}}, your {{item}} has arrived!"  |
+| custom_message       | string              | "Hi {{name}}, your {{item}} has arrived!"  |
+| custom_variables     | string              | "name=Tom; item=book"                      |
+| utc_offset           | string              | "+2", "+0", "-3:30"                        |
+
+### Custom messages
+Custom messages and custom email subjects can be set when scheduling events.
+They can contain template values.
+Template values are replaced by variables from the 'custom_variables' field.
+
+custom_message template value syntax: ```{{<variable_name>}}``` <br>
+custom_variables syntax: ```<variable_name>=<variable_value>; <variable_name>=<variable_value>```
+
+Example custom_message: ```Hi {{name}}, your {{item}} has arrived!``` <br>
+Example custom_variables: ```name=Tom; item=book``` <br>
+Example output message: ```Hi Tom, your book has arrived!```
 
 ### Note fields
 | Field      | Type                | Examples           |
@@ -87,11 +104,12 @@ Otherwise, JWT bearer token needs to be provided in request headers.
 | updated_at | string (read-only)  | "2023-05-15 14:00" |
 
 ### User fields
-| Field        | Type              | Examples          |
-|--------------|-------------------|-------------------|
-| username     | string (required) |                   |
-| e-mail       | string (required) | "name@email.com"  |
-| phone_number | string            | "37069935951"     |
+| Field           | Type              | Examples         |
+|-----------------|-------------------|------------------|
+| username        | string (required) |                  |
+| e-mail          | string (required) | "name@email.com" |
+| phone_number    | string            | "37069935951"    |
+| sms_sender_name | string            | "sender"         |
 
 ### User Settings fields
 | Field                     | Type   | Examples            |

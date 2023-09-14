@@ -6,29 +6,18 @@ from django.db import models
 from rest_framework import serializers
 
 from core.validators import (
+    count_validator,
+    custom_variables_validator,
     date_validator,
+    email_validator,
     interval_and_notice_validator,
     notification_type_validator,
+    phone_number_validator,
     time_validator,
     units_translation_dict,
     utc_offset_validator,
 )
 from users.models import UserSettings
-
-
-def get_utc_offset(local_date):  # Deprecated. Todo: derive from user location setting
-    datetime_object = datetime.strptime(local_date, "%Y-%m-%d")
-    local_timezone = datetime_object.astimezone()
-    offset = local_timezone.utcoffset() // timedelta(minutes=1) / 60
-    hours = int(offset)
-    mins = int(offset % 1 * 60)
-    if mins:
-        result = f"{hours}:{mins}"
-    else:
-        result = f"{hours}"
-    if result[0] != "-":
-        result = f"+{result}"
-    return result
 
 
 def parse_notice_time_or_interval(value):
@@ -69,6 +58,8 @@ class Event(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
+    recipient = models.CharField(max_length=100, default="")
+
     category = models.CharField(max_length=70, default="other")
     title = models.CharField(max_length=100)
     date = models.CharField(max_length=10, validators=[date_validator])
@@ -79,7 +70,14 @@ class Event(models.Model):
     interval = models.CharField(
         max_length=15, default="-", validators=[interval_and_notice_validator]
     )
-    info = models.TextField(max_length=3000, null=True, blank=True)
+    count = models.IntegerField(null=True, blank=True, validators=[count_validator])
+
+    custom_email_subject = models.CharField(max_length=100, null=True, blank=True)
+    custom_message = models.TextField(max_length=1000, null=True, blank=True)
+    custom_variables = models.CharField(
+        max_length=700, null=True, blank=True, validators=[custom_variables_validator]
+    )
+
     utc_offset = models.CharField(
         max_length=6, default="", validators=[utc_offset_validator]
     )
@@ -99,15 +97,37 @@ class Event(models.Model):
             self.utc_offset = user_settings.default_utc_offset
         if not self.notification_type:
             self.notification_type = user_settings.default_notification_type
-        if self.notification_type == "sms":
-            if not self.user.phone_number:
-                raise serializers.ValidationError(
-                    "Phone number needs to be entered in settings in order to use the SMS notification type."
-                )
+
+        self.validate_and_set_recipient()
+        self.validate_count()
+
         self.utc_timestamp = get_utc_timestamp(
             str(self.date), str(self.time), str(self.utc_offset), str(self.notice_time)
         )
         super(Event, self).save(*args, **kwargs)
+
+    def validate_and_set_recipient(self):
+        if self.notification_type == "sms":
+            if not self.user.phone_number and not self.recipient:
+                raise serializers.ValidationError(
+                    "Phone number needs to be entered in the recipient field or in user settings"
+                    " to use the SMS notification type."
+                )
+            elif self.recipient:
+                phone_number_validator(self.recipient)
+            else:
+                self.recipient = self.user.phone_number
+        elif self.notification_type == "email":
+            if self.recipient:
+                email_validator(self.recipient)
+            else:
+                self.recipient = self.user.email
+
+    def validate_count(self):
+        if self.interval == "-" and self.count:
+            raise serializers.ValidationError(
+                "Count can only be set if an interval is also set"
+            )
 
     def __str__(self):
         return f"ID{self.pk}({self.user.pk})|{self.category} - {self.title}"

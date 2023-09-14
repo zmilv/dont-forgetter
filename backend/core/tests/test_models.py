@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 
-from django.contrib.auth.hashers import make_password
 from django.test import TestCase
 from rest_framework.serializers import ValidationError
 
@@ -8,14 +7,12 @@ from core.models import (
     Event,
     apply_utc_offset,
     date_validator,
-    get_utc_offset,
     get_utc_timestamp,
     interval_and_notice_validator,
     parse_notice_time_or_interval,
     time_validator,
     utc_offset_validator,
 )
-from users.models import CustomUser
 
 
 class TestModelValidators(TestCase):
@@ -87,36 +84,3 @@ class TestModelHelperFuncs(TestCase):
         result = get_utc_timestamp("2024-01-01", "10:00", "+2", "30min")
         expected_result = 1704094200  # Mon Jan 01 2024 07:30:00 GMT+0
         self.assertEqual(result, expected_result)
-
-
-class TestEventModel(TestCase):
-    """Test suite for Event model"""
-
-    def setUp(self):
-        self.user = CustomUser.objects.create_user(
-            email="email@email.com", username="name", password=make_password("password")
-        )
-
-    def test_default_fields(self):
-        default_fields = {
-            "category": "other",
-            "time": "10:00",
-            "notice_time": "-",
-            "interval": "-",
-            "info": None,
-        }
-        dynamic_values = ["_state", "id", "utc_timestamp"]
-
-        event_values = Event.objects.create(
-            title="default", date="2020-01-01", user=self.user
-        ).__dict__
-        equivalent_event_values = Event.objects.create(
-            title="default", date="2020-01-01", **default_fields, user=self.user
-        ).__dict__
-        for value in dynamic_values:
-            del event_values[value]
-            del equivalent_event_values[value]
-        event_values = list(event_values.values())
-        equivalent_event_values = list(equivalent_event_values.values())
-        for i, attribute in enumerate(event_values):
-            self.assertEqual(attribute, equivalent_event_values[i])

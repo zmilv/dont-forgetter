@@ -75,7 +75,11 @@ class GETTestSuite(APITestCase):
                 ("notification_type", "email"),
                 ("utc_timestamp", 1704092400),
                 ("notice_time", "-"),
-                ("info", None),
+                ("count", None),
+                ("recipient", "email@email.com"),
+                ("custom_email_subject", None),
+                ("custom_message", None),
+                ("custom_variables", None),
             ]
         )
         self.id2_dict = dict(
@@ -89,7 +93,11 @@ class GETTestSuite(APITestCase):
                 ("notification_type", "email"),
                 ("utc_timestamp", 1704178800),
                 ("notice_time", "-"),
-                ("info", None),
+                ("count", None),
+                ("recipient", "email@email.com"),
+                ("custom_email_subject", None),
+                ("custom_message", None),
+                ("custom_variables", None),
             ]
         )
 
@@ -202,7 +210,7 @@ class GETTestSuite(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_data)
 
-    def test_get_post_with_invalid_query(self):
+    def test_get_with_invalid_query(self):
         query = 'EQUAL(title,"Title-1"'  # Missing closing bracket
         url = self.url + query
         response = self.client.get(url)

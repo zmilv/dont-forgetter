@@ -79,7 +79,7 @@ class GETTestSuite(APITestCase):
                 ("recipient", "email@email.com"),
                 ("custom_email_subject", None),
                 ("custom_message", None),
-                ("custom_variables", None)
+                ("custom_variables", None),
             ]
         )
         self.id2_dict = dict(
@@ -97,7 +97,7 @@ class GETTestSuite(APITestCase):
                 ("recipient", "email@email.com"),
                 ("custom_email_subject", None),
                 ("custom_message", None),
-                ("custom_variables", None)
+                ("custom_variables", None),
             ]
         )
 

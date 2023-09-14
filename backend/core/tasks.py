@@ -1,8 +1,8 @@
 import logging
 import os
+from abc import ABC, abstractmethod
 from datetime import datetime, timedelta, timezone
 
-from abc import ABC, abstractmethod
 import requests
 from celery import shared_task
 from django.conf import settings
@@ -67,7 +67,9 @@ class NotificationStrategy(ABC):
         notification_text += "."
         notification_text += f"\n(Scheduled for {self.event.date} {self.event.time} UTC{self.event.utc_offset})"
         if self.event.interval != "-":
-            notification_text += f"\nNext such event scheduled in {self.event.interval}."
+            notification_text += (
+                f"\nNext such event scheduled in {self.event.interval}."
+            )
         notification_text += settings.MESSAGE_SIGNATURE
 
         return notification_text
@@ -79,7 +81,13 @@ class EmailNotification(NotificationStrategy):
         self.email_title = self.get_email_title()
 
     def send_notification(self):
-        result = send_mail(self.email_title, self.message, None, [self.event.recipient], fail_silently=False)
+        result = send_mail(
+            self.email_title,
+            self.message,
+            None,
+            [self.event.recipient],
+            fail_silently=False,
+        )
         if result == 1:
             logger.info("E-mail sent")
             return True
@@ -90,7 +98,9 @@ class EmailNotification(NotificationStrategy):
         if not self.event.custom_email_subject:
             return self.build_default_title()
         elif self.event.custom_variables:
-            return self.build_custom_text(self.event.custom_email_subject, self.variable_dict)
+            return self.build_custom_text(
+                self.event.custom_email_subject, self.variable_dict
+            )
         return self.event.custom_email_subject
 
     def build_default_title(self):
@@ -137,7 +147,12 @@ class NotificationService:
         self.strategy = strategy(self.event)
 
     def send_notification(self):
-        if getattr(self.event.user, f"{self.event.notification_type}_notifications_left") > 0:
+        if (
+            getattr(
+                self.event.user, f"{self.event.notification_type}_notifications_left"
+            )
+            > 0
+        ):
             logger.info(f"{self.event} - Sending notification")
             logger.info(f"{self.event.date} {self.event.time}")
 
@@ -159,14 +174,18 @@ class NotificationService:
 
     def decrement_notifications_left(self):
         result = True
-        notifications_left = getattr(self.event.user, f"{self.event.notification_type}_notifications_left")
+        notifications_left = getattr(
+            self.event.user, f"{self.event.notification_type}_notifications_left"
+        )
         if notifications_left == 1:
             logger.info(f"Event {self.event} rejected due to notification limit")
             self.send_notification_limit_email()
             result = False
         notifications_left -= 1
         setattr(
-            self.event.user, f"{self.event.notification_type}_notifications_left", notifications_left
+            self.event.user,
+            f"{self.event.notification_type}_notifications_left",
+            notifications_left,
         )
         self.event.user.save()
         return result
@@ -177,8 +196,16 @@ class NotificationService:
             f" month. Please contact {settings.CONTACT_EMAIL} if you would like to have this"
             f" limit lifted.{settings.MESSAGE_SIGNATURE}"
         )
-        email_title = f"{self.event.notification_type} notification limit reached".capitalize()
-        result = send_mail(email_title, notification_limit_message, None, self.event.user.email, fail_silently=False)
+        email_title = (
+            f"{self.event.notification_type} notification limit reached".capitalize()
+        )
+        result = send_mail(
+            email_title,
+            notification_limit_message,
+            None,
+            self.event.user.email,
+            fail_silently=False,
+        )
         if result == 1:
             logger.info("Notification limit e-mail sent")
         logger.warning("Notification limit e-mail sending failed")
@@ -206,15 +233,21 @@ class NotificationEvent:
         self.event.save()
 
     def get_new_date_and_time(self):
-        current_datetime = datetime.fromtimestamp(self.current_utc_timestamp, tz=timezone.utc)
+        current_datetime = datetime.fromtimestamp(
+            self.current_utc_timestamp, tz=timezone.utc
+        )
         datetime_str = f"{self.event.date} {self.event.time}"
         datetime_object = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M").replace(
             tzinfo=timezone.utc
         )
         datetime_object = apply_utc_offset(self.event.utc_offset, datetime_object)
         while datetime_object < current_datetime:
-            datetime_object += timedelta(**parse_notice_time_or_interval(self.event.interval))
-        datetime_object = apply_utc_offset(self.event.utc_offset, datetime_object, reverse=True)
+            datetime_object += timedelta(
+                **parse_notice_time_or_interval(self.event.interval)
+            )
+        datetime_object = apply_utc_offset(
+            self.event.utc_offset, datetime_object, reverse=True
+        )
         datetime_str = datetime.strftime(datetime_object, "%Y-%m-%d %H:%M")
         new_date = datetime_str[:10]
         new_time = datetime_str[-5:]

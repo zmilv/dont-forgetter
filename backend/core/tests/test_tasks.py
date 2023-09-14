@@ -10,11 +10,11 @@ import core.tasks
 from backend.celery import app
 from core.models import Event
 from core.tasks import (
-    NotificationStrategy,
     EmailNotification,
-    SMSNotification,
-    NotificationService,
     NotificationEvent,
+    NotificationService,
+    NotificationStrategy,
+    SMSNotification,
     heartbeat,
     reset_notifications_left,
 )
@@ -26,14 +26,14 @@ class TestNotificationStrategy:
     @pytest.fixture()
     def strategy(self):
         mock_user = CustomUser.objects.create_user(
-                    email="email@email.com", username="name", password=make_password("password")
-                )
+            email="email@email.com", username="name", password=make_password("password")
+        )
         mock_event = Event.objects.create(
-                        title=f"Title",
-                        date=f"2024-01-01",
-                        notification_type="email",
-                        user=mock_user,
-                    )
+            title=f"Title",
+            date=f"2024-01-01",
+            notification_type="email",
+            user=mock_user,
+        )
 
         class MockNotificationStrategy(NotificationStrategy):
             def send_notification(self):
@@ -44,22 +44,28 @@ class TestNotificationStrategy:
     def test_get_message_without_custom_message(self, strategy, mocker):
         strategy.event.custom_message = None
         mock_build_default_message = mocker.patch(
-            "core.tasks.NotificationStrategy.build_default_message", return_value="default_message"
+            "core.tasks.NotificationStrategy.build_default_message",
+            return_value="default_message",
         )
         result = strategy.get_message()
         assert result == "default_message"
         mock_build_default_message.assert_called_once_with()
 
-    def test_get_message_with_custom_message_and_custom_variables(self, strategy, mocker):
+    def test_get_message_with_custom_message_and_custom_variables(
+        self, strategy, mocker
+    ):
         strategy.event.custom_message = "custom_message"
         strategy.event.custom_variables = "custom_variables"
         strategy.variable_dict = "variable_dict"
         mock_build_custom_text = mocker.patch(
-            "core.tasks.NotificationStrategy.build_custom_text", return_value="custom_text"
+            "core.tasks.NotificationStrategy.build_custom_text",
+            return_value="custom_text",
         )
         result = strategy.get_message()
         assert result == "custom_text"
-        mock_build_custom_text.assert_called_once_with("custom_message", "variable_dict")
+        mock_build_custom_text.assert_called_once_with(
+            "custom_message", "variable_dict"
+        )
 
     def test_get_message_with_custom_message_without_custom_variables(self, strategy):
         strategy.event.custom_message = "custom_message"
@@ -68,14 +74,14 @@ class TestNotificationStrategy:
 
     def test_build_custom_text(self, strategy):
         template = "hi {{name}}, your last name is {{surname}}"
-        variable_dict = {'name': 'Tom', 'surname': 'Smith'}
+        variable_dict = {"name": "Tom", "surname": "Smith"}
         result = strategy.build_custom_text(template, variable_dict)
         expected_result = "hi Tom, your last name is Smith"
         assert result == expected_result
 
     def test_build_custom_text_without_variables(self, strategy):
         template = "hello"
-        variable_dict = {'name': 'Tom', 'surname': 'Smith'}
+        variable_dict = {"name": "Tom", "surname": "Smith"}
         result = strategy.build_custom_text(template, variable_dict)
         expected_result = "hello"
         assert result == expected_result
@@ -83,13 +89,13 @@ class TestNotificationStrategy:
     def test_parse_custom_message_variables_with_two_variables(self, strategy):
         strategy.event.custom_variables = "name=Tom; surname=Smith"
         result = strategy.parse_custom_message_variables()
-        expected_result = {'name': 'Tom', 'surname': 'Smith'}
+        expected_result = {"name": "Tom", "surname": "Smith"}
         assert result == expected_result
 
     def test_parse_custom_message_variables_with_one_variable(self, strategy):
         strategy.event.custom_variables = "name=Tom"
         result = strategy.parse_custom_message_variables()
-        expected_result = {'name': 'Tom'}
+        expected_result = {"name": "Tom"}
         assert result == expected_result
 
 
@@ -116,7 +122,9 @@ class TestEmailNotification:
         result = email_notification.send_notification()
         expected_result = True
         assert result == expected_result
-        mock_send_email.assert_called_once_with("email_title", "message", None, ["recipient"], fail_silently=False)
+        mock_send_email.assert_called_once_with(
+            "email_title", "message", None, ["recipient"], fail_silently=False
+        )
 
     def test_send_notification_failed(self, email_notification, mocker):
         email_notification.email_title = "email_title"
@@ -126,29 +134,41 @@ class TestEmailNotification:
         result = email_notification.send_notification()
         expected_result = False
         assert result == expected_result
-        mock_send_email.assert_called_once_with("email_title", "message", None, ["recipient"], fail_silently=False)
+        mock_send_email.assert_called_once_with(
+            "email_title", "message", None, ["recipient"], fail_silently=False
+        )
 
-    def test_get_email_title_without_custom_email_subject(self, email_notification, mocker):
+    def test_get_email_title_without_custom_email_subject(
+        self, email_notification, mocker
+    ):
         email_notification.event.custom_email_subject = None
         mock_build_default_title = mocker.patch(
-            "core.tasks.EmailNotification.build_default_title", return_value="default_title"
+            "core.tasks.EmailNotification.build_default_title",
+            return_value="default_title",
         )
         result = email_notification.get_email_title()
         assert result == "default_title"
         mock_build_default_title.assert_called_once_with()
 
-    def test_get_email_title_with_custom_email_subject_and_custom_variables(self, email_notification, mocker):
+    def test_get_email_title_with_custom_email_subject_and_custom_variables(
+        self, email_notification, mocker
+    ):
         email_notification.event.custom_email_subject = "custom_email_subject"
         email_notification.event.custom_variables = "custom_variables"
         email_notification.variable_dict = "variable_dict"
         mock_build_custom_text = mocker.patch(
-            "core.tasks.NotificationStrategy.build_custom_text", return_value="custom_text"
+            "core.tasks.NotificationStrategy.build_custom_text",
+            return_value="custom_text",
         )
         result = email_notification.get_email_title()
         assert result == "custom_text"
-        mock_build_custom_text.assert_called_once_with("custom_email_subject", "variable_dict")
+        mock_build_custom_text.assert_called_once_with(
+            "custom_email_subject", "variable_dict"
+        )
 
-    def test_get_email_title_with_custom_email_subject_without_custom_variables(self, email_notification):
+    def test_get_email_title_with_custom_email_subject_without_custom_variables(
+        self, email_notification
+    ):
         email_notification.event.custom_email_subject = "custom_email_subject"
         result = email_notification.get_email_title()
         assert result == "custom_email_subject"
@@ -159,14 +179,16 @@ class TestSMSNotification:
     @pytest.fixture()
     def sms_notification(self):
         mock_user = CustomUser.objects.create_user(
-            email="email@email.com", username="name", password=make_password("password"),
+            email="email@email.com",
+            username="name",
+            password=make_password("password"),
         )
         mock_event = Event.objects.create(
             title=f"Title",
             date=f"2024-01-01",
             notification_type="sms",
             user=mock_user,
-            recipient="37069935951"
+            recipient="37069935951",
         )
         return SMSNotification(mock_event)
 
@@ -190,6 +212,7 @@ class TestSMSNotification:
             @staticmethod
             def json():
                 return {"messages": [{"status": "0"}]}
+
         mock_post = mocker.patch(
             "core.tasks.requests.Session.post", return_value=MockResponse
         )
@@ -219,6 +242,7 @@ class TestSMSNotification:
             @staticmethod
             def json():
                 return {"messages": [{"status": "1"}]}
+
         mock_post = mocker.patch(
             "core.tasks.requests.Session.post", return_value=MockResponse
         )
@@ -252,7 +276,8 @@ class TestNotificationService:
             "core.tasks.EmailNotification.send_notification", return_value=True
         )
         mock_decrement_notifications_left = mocker.patch(
-            "core.tasks.NotificationService.decrement_notifications_left", return_value=True
+            "core.tasks.NotificationService.decrement_notifications_left",
+            return_value=True,
         )
         result = service.send_notification()
         expected_result = True
@@ -269,7 +294,8 @@ class TestNotificationService:
             "core.tasks.EmailNotification.send_notification", return_value=True
         )
         mock_decrement_notifications_left = mocker.patch(
-            "core.tasks.NotificationService.decrement_notifications_left", return_value=True
+            "core.tasks.NotificationService.decrement_notifications_left",
+            return_value=True,
         )
         result = service.send_notification()
         expected_result = True
@@ -286,7 +312,8 @@ class TestNotificationService:
             "core.tasks.EmailNotification.send_notification", return_value=True
         )
         mock_decrement_notifications_left = mocker.patch(
-            "core.tasks.NotificationService.decrement_notifications_left", return_value=True
+            "core.tasks.NotificationService.decrement_notifications_left",
+            return_value=True,
         )
         result = service.send_notification()
         expected_result = True
@@ -301,7 +328,8 @@ class TestNotificationService:
             "core.tasks.EmailNotification.send_notification", return_value=False
         )
         mock_decrement_notifications_left = mocker.patch(
-            "core.tasks.NotificationService.decrement_notifications_left", return_value=True
+            "core.tasks.NotificationService.decrement_notifications_left",
+            return_value=True,
         )
         result = service.send_notification()
         expected_result = False
@@ -317,7 +345,8 @@ class TestNotificationService:
             "core.tasks.EmailNotification.send_notification", return_value=False
         )
         mock_decrement_notifications_left = mocker.patch(
-            "core.tasks.NotificationService.decrement_notifications_left", return_value=True
+            "core.tasks.NotificationService.decrement_notifications_left",
+            return_value=True,
         )
         result = service.send_notification()
         expected_result = True

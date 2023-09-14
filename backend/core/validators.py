@@ -9,7 +9,7 @@ regex_dict = {
     "utc_offset": "^[+-]\d{1,2}:?\d{0,2}$",  # +/-h(:mm)
     "phone_number": "^370\d{8}$",
     "email": "^[a-z0-9]+(?:[._][a-z0-9]+)*@(?:\w+\.)+\w{2,3}$",
-    "custom_variables": "(\w+(?:\d+)?)=([^;]+)(?:;|$)"
+    "custom_variables": "(\w+(?:\d+)?)=([^;]+)(?:;|$)",
 }
 
 units_translation_dict = {
@@ -76,10 +76,14 @@ def email_validator(value):
 
 def count_validator(value):
     if value < 2:
-        raise serializers.ValidationError("Count must be at least 2 if an interval is set")
+        raise serializers.ValidationError(
+            "Count must be at least 2 if an interval is set"
+        )
 
 
 def custom_variables_validator(value):
     regex = regex_dict["custom_variables"]
     if not re.fullmatch(regex, value):
-        raise serializers.ValidationError("Invalid custom variables format. Valid example: 'name=Tom; surname=Smith'")
+        raise serializers.ValidationError(
+            "Invalid custom variables format. Valid example: 'name=Tom; surname=Smith'"
+        )

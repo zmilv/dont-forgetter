@@ -74,7 +74,9 @@ class Event(models.Model):
 
     custom_email_subject = models.CharField(max_length=100, null=True, blank=True)
     custom_message = models.TextField(max_length=1000, null=True, blank=True)
-    custom_variables = models.CharField(max_length=700, null=True, blank=True, validators=[custom_variables_validator])
+    custom_variables = models.CharField(
+        max_length=700, null=True, blank=True, validators=[custom_variables_validator]
+    )
 
     utc_offset = models.CharField(
         max_length=6, default="", validators=[utc_offset_validator]
@@ -123,7 +125,9 @@ class Event(models.Model):
 
     def validate_count(self):
         if self.interval == "-" and self.count:
-            raise serializers.ValidationError("Count can only be set if an interval is also set")
+            raise serializers.ValidationError(
+                "Count can only be set if an interval is also set"
+            )
 
     def __str__(self):
         return f"ID{self.pk}({self.user.pk})|{self.category} - {self.title}"

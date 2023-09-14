@@ -274,7 +274,9 @@ class APIDetailView(GenericAPIView, metaclass=ABCMeta):
             type=openapi.TYPE_OBJECT,
             required=["title", "date"],
             properties={
-                "recipient": openapi.Schema(type=openapi.TYPE_STRING, default="<user email or phone number>"),
+                "recipient": openapi.Schema(
+                    type=openapi.TYPE_STRING, default="<user email or phone number>"
+                ),
                 "category": openapi.Schema(type=openapi.TYPE_STRING, default="other"),
                 "notification_type": openapi.Schema(
                     type=openapi.TYPE_STRING,
@@ -303,7 +305,9 @@ class APIDetailView(GenericAPIView, metaclass=ABCMeta):
                 "count": openapi.Schema(type=openapi.TYPE_NUMBER),
                 "custom_email_subject": openapi.Schema(type=openapi.TYPE_STRING),
                 "custom_message": openapi.Schema(type=openapi.TYPE_STRING),
-                "custom_variables": openapi.Schema(type=openapi.TYPE_STRING, pattern=regex_dict["custom_variables"]),
+                "custom_variables": openapi.Schema(
+                    type=openapi.TYPE_STRING, pattern=regex_dict["custom_variables"]
+                ),
                 "utc_offset": openapi.Schema(
                     type=openapi.TYPE_STRING,
                     default="<set in user settings>",

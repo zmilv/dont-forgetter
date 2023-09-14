@@ -137,8 +137,7 @@ class NotificationService:
         self.strategy = strategy(self.event)
 
     def send_notification(self):
-        notification_type = self.event.notification_type
-        if getattr(self.event.user, f"{notification_type}_notifications_left") > 0:
+        if getattr(self.event.user, f"{self.event.notification_type}_notifications_left") > 0:
             logger.info(f"{self.event} - Sending notification")
             logger.info(f"{self.event.date} {self.event.time}")
 

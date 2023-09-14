@@ -20,21 +20,6 @@ from core.validators import (
 from users.models import UserSettings
 
 
-def get_utc_offset(local_date):  # Deprecated. Todo: derive from user location setting
-    datetime_object = datetime.strptime(local_date, "%Y-%m-%d")
-    local_timezone = datetime_object.astimezone()
-    offset = local_timezone.utcoffset() // timedelta(minutes=1) / 60
-    hours = int(offset)
-    mins = int(offset % 1 * 60)
-    if mins:
-        result = f"{hours}:{mins}"
-    else:
-        result = f"{hours}"
-    if result[0] != "-":
-        result = f"+{result}"
-    return result
-
-
 def parse_notice_time_or_interval(value):
     _, number, units = re.split("(\d+)", value)
     units = units_translation_dict[units]

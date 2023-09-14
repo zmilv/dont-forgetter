@@ -121,7 +121,7 @@ class SMSNotification(NotificationStrategy):
             params = {
                 "api_key": vonage_api_key,
                 "api_secret": vonage_api_secret,
-                "from": self.event.user.sms_sender_name,
+                "from": self.event.user.usersettings.sms_sender_name,
                 "to": self.event.recipient,
                 "text": self.message,
             }

@@ -109,15 +109,14 @@ Example output message: ```Hi Tom, your book has arrived!```
 | username        | string (required) |                  |
 | e-mail          | string (required) | "name@email.com" |
 | phone_number    | string            | "37069935951"    |
-| sms_sender_name | string            | "sender"         |
 
 ### User Settings fields
-| Field                     | Type   | Examples            |
-|---------------------------|--------|---------------------|
-| default_notification_type | string | "email", "sms"      |
-| default_time              | string | "14:00"             |
-| default_utc_offset        | string | "+2", "+0", "-3:30" |
-
+| Field                     | Type         | Examples            |
+|---------------------------|--------------|---------------------|
+| default_notification_type | string       | "email", "sms"      |
+| default_time              | string       | "14:00"             |
+| default_utc_offset        | string       | "+2", "+0", "-3:30" |
+| sms_sender_name           | string       | "sender"            |
 
 ---
 
